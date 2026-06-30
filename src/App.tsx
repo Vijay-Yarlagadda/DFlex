@@ -6,6 +6,7 @@ import { Register } from './pages/auth/Register';
 import { Dashboard } from './pages/Dashboard';
 import { DietPlan } from './pages/DietPlan';
 import { Coach } from './pages/Coach';
+import { Onboarding } from './pages/Onboarding';
 import { AuthLayout } from './components/layout/AuthLayout';
 import { DashboardLayout } from './components/layout/DashboardLayout';
 
@@ -20,6 +21,8 @@ function App() {
           <Route path="/login" element={<Login />} />
           <Route path="/register" element={<Register />} />
         </Route>
+
+        <Route path="/onboarding" element={<Onboarding />} />
 
         {/* Dashboard Routes */}
         <Route element={<DashboardLayout />}>

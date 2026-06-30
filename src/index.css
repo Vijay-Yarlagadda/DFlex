@@ -1,0 +1,64 @@
+@import "tailwindcss";
+
+@theme {
+  --color-primary: #CCFF00; /* Neon Lime */
+  --color-secondary: #FF3366; /* High Energy Pink/Red */
+  --color-accent: #00E5FF; /* Cyan */
+  
+  --color-bg-light: #F4F4F5;
+  --color-bg-dark: #09090B;
+  
+  --font-sans: "Inter", system-ui, sans-serif;
+  
+  /* Gym-specific custom tokens */
+  --font-black: 900;
+}
+
+@layer base {
+  :root {
+    /* Hardcoded dark mode for gym vibe */
+    --background: #09090B;
+    --foreground: #FAFAFA;
+    --card: #18181B;
+    --card-foreground: #FAFAFA;
+    --border: #27272A;
+    --muted: #A1A1AA;
+  }
+  
+  * {
+    border-color: var(--border);
+  }
+  
+  body {
+    background-color: var(--background);
+    color: var(--foreground);
+    font-family: var(--font-sans);
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+  }
+  
+  h1, h2, h3, h4, h5, h6 {
+    text-transform: uppercase;
+    font-weight: 900;
+    letter-spacing: -0.05em;
+  }
+}
+
+@layer utilities {
+  .glass {
+    background: rgba(24, 24, 27, 0.7);
+    backdrop-filter: blur(16px);
+    -webkit-backdrop-filter: blur(16px);
+    border: 1px solid rgba(255, 255, 255, 0.05);
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.4);
+  }
+  
+  /* Aggressive skew utility for buttons/headers */
+  .skew-btn {
+    transform: skewX(-10deg);
+  }
+  .skew-btn-content {
+    transform: skewX(10deg);
+    display: inline-block;
+  }
+}

@@ -34,7 +34,7 @@ export const Landing = () => {
               Elite AI-generated meal plans designed to crush your macros, maximize muscle gain, and obliterate fat. Engineered for peak performance.
             </p>
             <div className="flex flex-col sm:flex-row items-center justify-center gap-6">
-              <Link to="/register">
+              <Link to="/assessment">
                 <Button size="lg" className="w-full sm:w-auto">
                   START FORGING <ArrowRight size={18} className="ml-2" />
                 </Button>

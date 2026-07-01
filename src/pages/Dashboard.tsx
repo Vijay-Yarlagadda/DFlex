@@ -1,124 +1,84 @@
 import React from 'react';
-import { Card } from '../components/ui/card';
-import { Button } from '../components/ui/button';
-import { Flame, Droplets, Target, Activity } from 'lucide-react';
-import { motion } from 'framer-motion';
-import {
-  AreaChart,
-  Area,
-  XAxis,
-  YAxis,
-  CartesianGrid,
-  Tooltip,
-  ResponsiveContainer
-} from 'recharts';
-
-const mockData = [
-  { name: 'Mon', calories: 2100 },
-  { name: 'Tue', calories: 2250 },
-  { name: 'Wed', calories: 2150 },
-  { name: 'Thu', calories: 2300 },
-  { name: 'Fri', calories: 2400 },
-  { name: 'Sat', calories: 2000 },
-  { name: 'Sun', calories: 2100 },
-];
+import { Navigate } from 'react-router-dom';
+import { useAppStore } from '../lib/store';
+import { Card } from '../components/ui/Card';
+import { Activity, Flame, Target, Droplet, Dumbbell } from 'lucide-react';
 
 export const Dashboard = () => {
+  const { userData, metrics } = useAppStore();
+
+  if (!userData || !metrics) {
+    return <Navigate to="/assessment" />;
+  }
+
   return (
-    <div className="space-y-8 pb-10">
-      <div className="flex flex-col md:flex-row md:items-end justify-between gap-4">
-        <div>
-          <h1 className="text-3xl font-bold tracking-tight mb-1">Welcome back, Alex! 👋</h1>
-          <p className="text-muted">Here's your progress for today.</p>
-        </div>
-        <Button>Log Meal</Button>
-      </div>
+    <div className="p-4 md:p-8 max-w-5xl mx-auto space-y-6">
+      <header className="mb-8">
+        <h1 className="text-3xl font-black uppercase tracking-tight text-white mb-2">
+          Overview
+        </h1>
+        <p className="text-zinc-400">Welcome back, {userData.name}. Here are your optimized metrics.</p>
+      </header>
 
-      {/* Top Stats */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-        {[
-          { label: 'Calories', value: '2,150', target: '2,400 kcal', icon: Flame, color: 'text-orange-500', bg: 'bg-orange-500/10' },
-          { label: 'Protein', value: '140g', target: '160g', icon: Activity, color: 'text-blue-500', bg: 'bg-blue-500/10' },
-          { label: 'Carbs', value: '210g', target: '250g', icon: Target, color: 'text-emerald-500', bg: 'bg-emerald-500/10' },
-          { label: 'Water', value: '2.5L', target: '3.5L', icon: Droplets, color: 'text-cyan-500', bg: 'bg-cyan-500/10' },
-        ].map((stat, i) => (
-          <motion.div
-            key={stat.label}
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: i * 0.1 }}
-          >
-            <Card className="p-6">
-              <div className="flex items-center gap-4 mb-4">
-                <div className={`w-10 h-10 rounded-xl flex items-center justify-center ${stat.bg} ${stat.color}`}>
-                  <stat.icon size={20} />
-                </div>
-                <div>
-                  <p className="text-sm font-medium text-muted">{stat.label}</p>
-                  <div className="flex items-baseline gap-2">
-                    <h3 className="text-2xl font-bold">{stat.value}</h3>
-                    <span className="text-xs text-muted">/ {stat.target}</span>
-                  </div>
-                </div>
-              </div>
-              <div className="w-full bg-border h-2 rounded-full overflow-hidden">
-                <div 
-                  className={`h-full rounded-full bg-current ${stat.color.replace('text-', 'bg-')}`} 
-                  style={{ width: '75%' }} 
-                />
-              </div>
-            </Card>
-          </motion.div>
-        ))}
-      </div>
-
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-        {/* Chart */}
-        <Card className="p-6 lg:col-span-2 flex flex-col">
-          <h3 className="text-lg font-semibold mb-6">Calorie Intake (This Week)</h3>
-          <div className="h-[300px] w-full flex-1">
-            <ResponsiveContainer width="100%" height="100%">
-              <AreaChart data={mockData} margin={{ top: 0, right: 0, left: -20, bottom: 0 }}>
-                <defs>
-                  <linearGradient id="colorCalories" x1="0" y1="0" x2="0" y2="1">
-                    <stop offset="5%" stopColor="var(--color-primary)" stopOpacity={0.3}/>
-                    <stop offset="95%" stopColor="var(--color-primary)" stopOpacity={0}/>
-                  </linearGradient>
-                </defs>
-                <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="var(--border)" />
-                <XAxis dataKey="name" axisLine={false} tickLine={false} tick={{ fill: 'var(--muted)' }} dy={10} />
-                <YAxis axisLine={false} tickLine={false} tick={{ fill: 'var(--muted)' }} />
-                <Tooltip 
-                  contentStyle={{ backgroundColor: 'var(--card)', borderColor: 'var(--border)', borderRadius: '12px' }}
-                  itemStyle={{ color: 'var(--foreground)' }}
-                />
-                <Area type="monotone" dataKey="calories" stroke="var(--color-primary)" strokeWidth={3} fillOpacity={1} fill="url(#colorCalories)" />
-              </AreaChart>
-            </ResponsiveContainer>
+      {/* Primary Goal & Calories */}
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+        <Card className="p-6 bg-gradient-to-br from-zinc-900 to-zinc-950 border-[#CCFF00]/20 flex flex-col justify-center">
+          <div className="flex items-center gap-3 text-[#CCFF00] mb-4">
+            <Target size={24} />
+            <span className="font-bold uppercase tracking-wider text-sm">Current Goal</span>
           </div>
+          <div className="text-4xl font-black uppercase text-white mb-2">{userData.goal}</div>
+          <div className="text-zinc-400 text-sm">Based on your activity level: {userData.activityLevel}</div>
         </Card>
 
-        {/* Next Meal */}
-        <Card className="p-6">
-          <h3 className="text-lg font-semibold mb-6">Up Next</h3>
-          <div className="space-y-4">
-            <div className="p-4 rounded-xl border border-border bg-background">
-              <div className="flex justify-between items-start mb-2">
-                <span className="text-xs font-semibold text-[var(--color-primary)] uppercase tracking-wider">Lunch</span>
-                <span className="text-xs text-muted">1:00 PM</span>
-              </div>
-              <h4 className="font-medium mb-1">Grilled Chicken Salad</h4>
-              <p className="text-sm text-muted mb-4">Mixed greens, 150g chicken breast, olive oil dressing.</p>
-              <div className="flex gap-4 text-xs font-medium text-muted">
-                <span>🔥 450 kcal</span>
-                <span>🍗 45g P</span>
-                <span>🍞 15g C</span>
-              </div>
-            </div>
-            <Button variant="outline" className="w-full">View Full Diet Plan</Button>
+        <Card className="p-6 flex flex-col justify-center relative overflow-hidden">
+          <div className="absolute right-0 top-0 w-32 h-32 bg-[#FF3366]/10 blur-[50px] rounded-full" />
+          <div className="flex items-center gap-3 text-[#FF3366] mb-4">
+            <Flame size={24} />
+            <span className="font-bold uppercase tracking-wider text-sm">Daily Target</span>
+          </div>
+          <div className="flex items-baseline gap-2">
+            <span className="text-5xl font-black text-white">{metrics.dailyCalories}</span>
+            <span className="text-zinc-500 font-bold">kcal</span>
           </div>
         </Card>
+      </div>
+
+      {/* Macros */}
+      <h2 className="text-xl font-black uppercase tracking-tight text-white mt-8 mb-4">Macro Distribution</h2>
+      <div className="grid grid-cols-3 gap-4">
+        <MacroCard title="Protein" value={metrics.protein} unit="g" color="#CCFF00" />
+        <MacroCard title="Carbs" value={metrics.carbs} unit="g" color="#00E5FF" />
+        <MacroCard title="Fat" value={metrics.fat} unit="g" color="#FF3366" />
+      </div>
+
+      {/* Secondary Metrics */}
+      <h2 className="text-xl font-black uppercase tracking-tight text-white mt-8 mb-4">Body Metrics</h2>
+      <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+        <MetricBox label="BMI" value={metrics.bmi} />
+        <MetricBox label="BMR" value={metrics.bmr} unit="kcal" />
+        <MetricBox label="TDEE" value={metrics.tdee} unit="kcal" />
+        <MetricBox label="Water" value={metrics.waterGoal / 1000} unit="L" />
       </div>
     </div>
   );
 };
+
+const MacroCard = ({ title, value, unit, color }: { title: string, value: number, unit: string, color: string }) => (
+  <Card className="p-4 flex flex-col items-center justify-center text-center">
+    <div className="text-zinc-500 font-bold text-xs uppercase tracking-wider mb-2">{title}</div>
+    <div className="flex items-baseline gap-1" style={{ color }}>
+      <span className="text-2xl md:text-3xl font-black">{value}</span>
+      <span className="text-xs font-bold opacity-70">{unit}</span>
+    </div>
+  </Card>
+);
+
+const MetricBox = ({ label, value, unit = "" }: { label: string, value: string | number, unit?: string }) => (
+  <div className="bg-zinc-900/50 border border-zinc-800 rounded-lg p-4 flex flex-col">
+    <span className="text-zinc-500 text-xs font-bold uppercase tracking-wider mb-1">{label}</span>
+    <div className="text-white font-black text-xl flex items-baseline gap-1">
+      {value} <span className="text-zinc-500 text-xs">{unit}</span>
+    </div>
+  </div>
+);

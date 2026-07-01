@@ -1,32 +1,26 @@
-import React from "react";
-import { cn } from "../../lib/utils";
-import { motion, type HTMLMotionProps } from "framer-motion";
+import React from 'react';
+import { cn } from '../../lib/utils';
 
-export const Card = React.forwardRef<HTMLDivElement, HTMLMotionProps<"div">>(
-  ({ className, ...props }, ref) => (
-    <motion.div
-      ref={ref}
-      initial={{ opacity: 0, y: 10 }}
-      animate={{ opacity: 1, y: 0 }}
-      className={cn(
-        "border border-border bg-card text-card-foreground shadow-lg overflow-hidden border-l-4 border-l-[var(--color-primary)]",
-        className
-      )}
-      {...props}
-    />
-  )
+interface CardProps extends React.HTMLAttributes<HTMLDivElement> {
+  glass?: boolean;
+}
+
+export const Card = React.forwardRef<HTMLDivElement, CardProps>(
+  ({ className, glass = true, children, ...props }, ref) => {
+    return (
+      <div
+        ref={ref}
+        className={cn(
+          "rounded-xl overflow-hidden",
+          glass ? "bg-zinc-900/50 backdrop-blur-xl border border-zinc-800 shadow-xl" : "bg-zinc-900",
+          className
+        )}
+        {...props}
+      >
+        {children}
+      </div>
+    );
+  }
 );
+
 Card.displayName = "Card";
-
-export const GlassCard = React.forwardRef<HTMLDivElement, HTMLMotionProps<"div">>(
-  ({ className, ...props }, ref) => (
-    <motion.div
-      ref={ref}
-      initial={{ opacity: 0, y: 10 }}
-      animate={{ opacity: 1, y: 0 }}
-      className={cn("glass p-6 border-l-4 border-l-[var(--color-primary)]", className)}
-      {...props}
-    />
-  )
-);
-GlassCard.displayName = "GlassCard";

@@ -3,7 +3,7 @@ import type { UserData, DashboardMetrics, Meal } from './store';
 
 // We fall back to a sophisticated generator if no API key is provided
 const fallbackGenerator = (userData: UserData, metrics: DashboardMetrics): Meal[] => {
-  const isVeg = userData.dietType === 'Vegetarian' || userData.dietType === 'Vegan';
+  const isVeg = userData.dietType === 'Veg' || userData.dietType === 'Both';
   const meals = [
     {
       name: 'Breakfast',

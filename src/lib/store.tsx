@@ -22,7 +22,7 @@ export interface UserData {
   goal: GoalType;
 
   // Food Preferences
-  dietType: 'Vegetarian' | 'Vegan' | 'Eggetarian' | 'Non Vegetarian';
+  dietType: 'Veg' | 'Non-Veg' | 'Both';
   cuisinePreference: string;
   foodPreferences: Record<string, PreferenceLevel>;
   supplements: string[];

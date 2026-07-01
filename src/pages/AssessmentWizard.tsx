@@ -12,7 +12,7 @@ import { Button } from '../components/ui/Button';
 const TRAINING_TYPES = ['Gym', 'Home Workout', 'CrossFit', 'Running', 'Cycling', 'Yoga', 'Sports', 'No Exercise'];
 const ACTIVITY_LEVELS = ['Sedentary', 'Lightly Active', 'Moderately Active', 'Very Active', 'Athlete'];
 const BUDGETS = ['₹100', '₹200', '₹300', '₹500', '₹700+'];
-const DIET_TYPES = ['Vegetarian', 'Vegan', 'Eggetarian', 'Non Vegetarian'];
+const DIET_TYPES = ['Veg', 'Non-Veg', 'Both'];
 const CUISINES = ['South Indian', 'North Indian', 'Mixed Indian', 'International'];
 
 const GOALS = [
@@ -25,11 +25,11 @@ const GOALS = [
 ];
 
 const FOODS = {
-  Protein: ['Chicken', 'Mutton', 'Fish', 'Eggs', 'Paneer', 'Milk', 'Curd', 'Greek Yogurt', 'Tofu', 'Soy Chunks', 'Dal', 'Chickpeas', 'Rajma', 'Green Gram', 'Black Chana', 'Sprouts'],
-  Carbohydrates: ['Rice', 'Brown Rice', 'Roti', 'Oats', 'Sweet Potato', 'Poha', 'Upma', 'Idli', 'Dosa', 'Bread', 'Millets'],
-  Fats: ['Ghee', 'Butter', 'Olive Oil', 'Groundnut Oil', 'Peanuts', 'Almonds', 'Walnuts', 'Cashews', 'Seeds', 'Avocado'],
-  Fruits: ['Banana', 'Apple', 'Orange', 'Mango', 'Papaya', 'Watermelon', 'Pomegranate', 'Grapes'],
-  Vegetables: ['Spinach', 'Broccoli', 'Carrot', 'Beans', 'Cabbage', 'Cauliflower', 'Capsicum', 'Beetroot', 'Tomato', 'Cucumber', 'Bottle Gourd', 'Ladies Finger']
+  Protein: ['Chicken', 'Eggs', 'Paneer', 'Milk', 'Curd', 'Greek Yogurt', 'Tofu', 'Soy Chunks', 'Dal (Lentils)', 'Chickpeas', 'Rajma', 'Sprouts', 'Mutton', 'Fish', 'Whey Protein'],
+  Carbohydrates: ['White Rice', 'Brown Rice', 'Roti / Chapati', 'Oats', 'Potato', 'Sweet Potato', 'Poha', 'Upma', 'Bread', 'Millets', 'Quinoa'],
+  Fats: ['Peanut Butter', 'Peanuts', 'Ghee', 'Butter', 'Cheese', 'Olive Oil', 'Almonds', 'Walnuts', 'Mixed Seeds', 'Avocado'],
+  Fruits: ['Banana', 'Apple', 'Orange', 'Mango', 'Papaya', 'Watermelon', 'Guava', 'Grapes', 'Pomegranate'],
+  Vegetables: ['Spinach', 'Broccoli', 'Carrot', 'Beans', 'Cabbage', 'Cauliflower', 'Capsicum', 'Tomato', 'Cucumber', 'Mushroom', 'Onion']
 };
 
 const ALLERGIES = ['Milk', 'Eggs', 'Peanuts', 'Tree Nuts', 'Soy', 'Gluten', 'Seafood', 'None'];
@@ -55,7 +55,7 @@ export const AssessmentWizard = () => {
     trainingType: 'Gym', activityLevel: 'Moderately Active',
     workoutDays: 4, mealsPerDay: 4, budget: '₹300',
     goal: 'Lean Cut',
-    dietType: 'Non Vegetarian', cuisinePreference: 'Mixed Indian',
+    dietType: 'Non-Veg', cuisinePreference: 'Mixed Indian',
     foodPreferences: {}, supplements: ['None'],
     allergies: ['None'], medicalConditions: ['None'],
     waterIntakeGoal: '3L', sleepDuration: '7 hrs',

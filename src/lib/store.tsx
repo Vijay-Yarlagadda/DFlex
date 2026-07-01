@@ -1,23 +1,41 @@
 import React, { createContext, useContext, useState, useEffect, ReactNode } from 'react';
 
-export type GoalType = 'Lean Bulk' | 'Dirty Bulk' | 'Lean Cut' | 'Fat Loss' | 'Maintenance';
+export type GoalType = 'Lean Bulk' | 'Dirty Bulk' | 'Lean Cut' | 'Fat Loss' | 'Maintenance' | 'Body Recomposition';
+export type PreferenceLevel = 'Love' | 'Like' | 'Neutral' | 'Avoid';
 
 export interface UserData {
+  // Basic Profile
   name: string;
   age: number;
   gender: 'Male' | 'Female' | 'Other';
   height: number;
+  heightUnit: 'cm' | 'ft';
   weight: number;
-  goal: GoalType;
-  activityLevel: 'Sedentary' | 'Light' | 'Moderate' | 'Active' | 'Very Active';
+  weightUnit: 'kg' | 'lbs';
+  trainingType: string;
+  activityLevel: 'Sedentary' | 'Lightly Active' | 'Moderately Active' | 'Very Active' | 'Athlete';
   workoutDays: number;
-  sleepHours: number;
-  foodPreference: 'Veg' | 'Vegan' | 'Egg' | 'Non-Veg';
-  allergies: string[];
-  budget: string;
   mealsPerDay: number;
-  foodsToAvoid: string;
-  favoriteFoods: string;
+  budget: string;
+
+  // Goal
+  goal: GoalType;
+
+  // Food Preferences
+  dietType: 'Vegetarian' | 'Vegan' | 'Eggetarian' | 'Non Vegetarian';
+  cuisinePreference: string;
+  foodPreferences: Record<string, PreferenceLevel>;
+  supplements: string[];
+
+  // Health & Lifestyle
+  allergies: string[];
+  medicalConditions: string[];
+  waterIntakeGoal: string;
+  sleepDuration: string;
+  smoking: string;
+  alcohol: string;
+  cookingTime: string;
+  spicePreference: string;
 }
 
 export interface DashboardMetrics {
@@ -45,7 +63,7 @@ export interface DailyLog {
   date: string; // YYYY-MM-DD
   water: number;
   weight: number;
-  mealsEaten: string[]; // Array of meal names (e.g. "Breakfast")
+  mealsEaten: string[]; 
 }
 
 interface AppState {
@@ -53,7 +71,7 @@ interface AppState {
   userData: UserData | null;
   metrics: DashboardMetrics | null;
   dietPlan: Meal[];
-  dailyLogs: Record<string, DailyLog>; // map of YYYY-MM-DD to log
+  dailyLogs: Record<string, DailyLog>; 
   waterIntake: number;
   
   setApiKey: (key: string) => void;
@@ -61,7 +79,6 @@ interface AppState {
   calculateMetrics: () => void;
   setDietPlan: (plan: Meal[]) => void;
   
-  // Daily Trackers
   addWater: (amount: number) => void;
   resetWater: () => void;
   toggleMeal: (mealName: string, date: string) => void;
@@ -72,9 +89,67 @@ interface AppState {
 
 const AppContext = createContext<AppState | undefined>(undefined);
 
-const LOCAL_STORAGE_KEY = 'dflex_state_v2';
+// Changed key to v3 to force cache clear for the new massive data structure
+const LOCAL_STORAGE_KEY = 'dflex_state_v3'; 
 
 const getTodayString = () => new Date().toISOString().split('T')[0];
+
+// Pure function to calculate metrics (used by store AND Review step)
+export const computeMetrics = (user: UserData): DashboardMetrics => {
+  // Normalize units
+  const weightInKg = user.weightUnit === 'lbs' ? user.weight * 0.453592 : user.weight;
+  let heightInCm = user.height;
+  if (user.heightUnit === 'ft') {
+    // For simplicity, if they entered 5.11 we treat it as 5 feet 11 inches
+    const ft = Math.floor(user.height);
+    const inches = Math.round((user.height - ft) * 100); 
+    heightInCm = (ft * 30.48) + (inches * 2.54);
+  }
+
+  const heightInM = heightInCm / 100;
+  const bmi = weightInKg / (heightInM * heightInM);
+  
+  let bmr = 10 * weightInKg + 6.25 * heightInCm - 5 * user.age;
+  bmr += user.gender === 'Male' ? 5 : -161;
+  
+  const activityMultipliers: Record<string, number> = {
+    'Sedentary': 1.2, 
+    'Lightly Active': 1.375, 
+    'Moderately Active': 1.55, 
+    'Very Active': 1.725, 
+    'Athlete': 1.9,
+  };
+  const tdee = bmr * (activityMultipliers[user.activityLevel] || 1.2);
+  
+  let targetCalories = tdee;
+  if (user.goal === 'Lean Bulk') targetCalories += 300;
+  if (user.goal === 'Dirty Bulk') targetCalories += 500;
+  if (user.goal === 'Lean Cut') targetCalories -= 300;
+  if (user.goal === 'Fat Loss') targetCalories -= 500;
+  // Maintenance and Body Recomposition stay roughly at TDEE
+
+  let pRatio = 0.3, cRatio = 0.4, fRatio = 0.3;
+  if (user.goal.includes('Bulk')) { pRatio = 0.25; cRatio = 0.5; fRatio = 0.25; }
+  if (user.goal.includes('Loss') || user.goal.includes('Cut') || user.goal === 'Body Recomposition') { 
+    pRatio = 0.4; cRatio = 0.3; fRatio = 0.3; 
+  }
+
+  const protein = (targetCalories * pRatio) / 4;
+  const carbs = (targetCalories * cRatio) / 4;
+  const fat = (targetCalories * fRatio) / 9;
+  const waterGoal = (weightInKg * 35) + (user.workoutDays > 0 ? 500 : 0);
+
+  return {
+    bmi: Math.round(bmi * 10) / 10,
+    bmr: Math.round(bmr),
+    tdee: Math.round(tdee),
+    dailyCalories: Math.round(targetCalories),
+    protein: Math.round(protein),
+    carbs: Math.round(carbs),
+    fat: Math.round(fat),
+    waterGoal: Math.round(waterGoal),
+  };
+};
 
 export const AppProvider = ({ children }: { children: ReactNode }) => {
   const [apiKey, setApiKeyState] = useState<string>('');
@@ -84,7 +159,6 @@ export const AppProvider = ({ children }: { children: ReactNode }) => {
   const [dailyLogs, setDailyLogs] = useState<Record<string, DailyLog>>({});
   const [waterIntake, setWaterIntakeState] = useState<number>(0);
 
-  // Load from local storage
   useEffect(() => {
     const saved = localStorage.getItem(LOCAL_STORAGE_KEY);
     if (saved) {
@@ -106,18 +180,16 @@ export const AppProvider = ({ children }: { children: ReactNode }) => {
     }
   }, []);
 
-  // Save to local storage
   useEffect(() => {
     const stateToSave = { apiKey, userData, metrics, dietPlan, dailyLogs };
     localStorage.setItem(LOCAL_STORAGE_KEY, JSON.stringify(stateToSave));
   }, [apiKey, userData, metrics, dietPlan, dailyLogs]);
 
-  // Sync current day water to daily log
   useEffect(() => {
     const today = getTodayString();
     setDailyLogs(prev => {
       const todayLog = prev[today] || { date: today, water: 0, weight: userData?.weight || 0, mealsEaten: [] };
-      if (todayLog.water === waterIntake) return prev; // no change
+      if (todayLog.water === waterIntake) return prev; 
       return {
         ...prev,
         [today]: { ...todayLog, water: waterIntake }
@@ -136,39 +208,7 @@ export const AppProvider = ({ children }: { children: ReactNode }) => {
 
   const calculateMetrics = () => {
     if (!userData) return;
-    const heightInM = userData.height / 100;
-    const bmi = userData.weight / (heightInM * heightInM);
-    let bmr = 10 * userData.weight + 6.25 * userData.height - 5 * userData.age;
-    bmr += userData.gender === 'Male' ? 5 : -161;
-    const activityMultipliers: Record<string, number> = {
-      Sedentary: 1.2, Light: 1.375, Moderate: 1.55, Active: 1.725, 'Very Active': 1.9,
-    };
-    const tdee = bmr * (activityMultipliers[userData.activityLevel] || 1.2);
-    let targetCalories = tdee;
-    if (userData.goal === 'Lean Bulk') targetCalories += 300;
-    if (userData.goal === 'Dirty Bulk') targetCalories += 500;
-    if (userData.goal === 'Lean Cut') targetCalories -= 300;
-    if (userData.goal === 'Fat Loss') targetCalories -= 500;
-
-    let pRatio = 0.3, cRatio = 0.4, fRatio = 0.3;
-    if (userData.goal.includes('Bulk')) { pRatio = 0.25; cRatio = 0.5; fRatio = 0.25; }
-    if (userData.goal.includes('Loss') || userData.goal.includes('Cut')) { pRatio = 0.4; cRatio = 0.3; fRatio = 0.3; }
-
-    const protein = (targetCalories * pRatio) / 4;
-    const carbs = (targetCalories * cRatio) / 4;
-    const fat = (targetCalories * fRatio) / 9;
-    const waterGoal = (userData.weight * 35) + (userData.workoutDays > 0 ? 500 : 0);
-
-    setMetrics({
-      bmi: Math.round(bmi * 10) / 10,
-      bmr: Math.round(bmr),
-      tdee: Math.round(tdee),
-      dailyCalories: Math.round(targetCalories),
-      protein: Math.round(protein),
-      carbs: Math.round(carbs),
-      fat: Math.round(fat),
-      waterGoal: Math.round(waterGoal),
-    });
+    setMetrics(computeMetrics(userData));
   };
 
   const setDietPlan = (plan: Meal[]) => setDietPlanState(plan);
@@ -197,7 +237,6 @@ export const AppProvider = ({ children }: { children: ReactNode }) => {
       const log = prev[date] || { date, water: waterIntake, weight, mealsEaten: [] };
       return { ...prev, [date]: { ...log, weight } };
     });
-    // Also update current profile weight if logging for today
     if (date === getTodayString() && userData) {
       updateUserData({ weight });
       calculateMetrics();

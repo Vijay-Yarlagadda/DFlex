@@ -3,7 +3,7 @@ import type { UserData, DashboardMetrics, Meal } from './store';
 
 // We fall back to a sophisticated generator if no API key is provided
 const fallbackGenerator = (userData: UserData, metrics: DashboardMetrics): Meal[] => {
-  const isVeg = userData.foodPreference === 'Veg' || userData.foodPreference === 'Vegan';
+  const isVeg = userData.dietType === 'Vegetarian' || userData.dietType === 'Vegan';
   const meals = [
     {
       name: 'Breakfast',
@@ -60,7 +60,6 @@ export const generateDietWithAI = async (
   metrics: DashboardMetrics
 ): Promise<Meal[]> => {
   if (!apiKey || apiKey.trim() === '') {
-    // Simulate network delay for the fallback
     await new Promise(r => setTimeout(r, 2000));
     return fallbackGenerator(userData, metrics);
   }
@@ -68,14 +67,33 @@ export const generateDietWithAI = async (
   try {
     const ai = new GoogleGenAI({ apiKey });
     
+    // Parse food preferences
+    const lovedFoods = Object.entries(userData.foodPreferences).filter(([_, v]) => v === 'Love').map(([k]) => k).join(', ');
+    const likedFoods = Object.entries(userData.foodPreferences).filter(([_, v]) => v === 'Like').map(([k]) => k).join(', ');
+    const avoidedFoods = Object.entries(userData.foodPreferences).filter(([_, v]) => v === 'Avoid').map(([k]) => k).join(', ');
+
     const prompt = `
       You are an elite sports nutritionist AI. Generate a strict ${userData.mealsPerDay}-meal diet plan for a ${userData.age} year old ${userData.gender}.
-      Goal: ${userData.goal}.
-      Target Macros per day: ${metrics.dailyCalories} kcal, ${metrics.protein}g protein, ${metrics.carbs}g carbs, ${metrics.fat}g fat.
-      Food Preference: ${userData.foodPreference}.
-      Allergies: ${userData.allergies.join(', ')}.
-      Foods to avoid: ${userData.foodsToAvoid || 'None'}.
-      Favorite foods: ${userData.favoriteFoods || 'None'}.
+      
+      [PHYSICAL & LIFESTYLE]
+      Goal: ${userData.goal}
+      Training: ${userData.trainingType} (${userData.activityLevel}, ${userData.workoutDays} days/week)
+      Target Macros: ${metrics.dailyCalories} kcal, ${metrics.protein}g protein, ${metrics.carbs}g carbs, ${metrics.fat}g fat.
+      Cooking Time Available: ${userData.cookingTime}
+      Medical Conditions: ${userData.medicalConditions.join(', ') || 'None'}
+      
+      [NUTRITION PREFERENCES]
+      Diet Type: ${userData.dietType}
+      Cuisine Preference: ${userData.cuisinePreference}
+      Spice Level: ${userData.spicePreference}
+      Allergies: ${userData.allergies.join(', ') || 'None'}
+      Supplements Taken: ${userData.supplements.join(', ') || 'None'}
+      Budget Constraint: ${userData.budget} per day
+      
+      [SPECIFIC FOOD PREFERENCES]
+      MUST INCLUDE / LOVED: ${lovedFoods || 'None'}
+      CAN INCLUDE / LIKED: ${likedFoods || 'None'}
+      STRICTLY AVOID: ${avoidedFoods || 'None'}
 
       IMPORTANT: You must return the output STRICTLY as a JSON array of objects. Do not include markdown formatting or backticks.
       Format:
@@ -90,7 +108,7 @@ export const generateDietWithAI = async (
           "fat": number
         }
       ]
-      Make sure the total calories and macros sum up closely to the daily targets.
+      Make sure the total calories and macros sum up closely to the daily targets. Ensure the food matches their cuisine preference, cooking time, and avoids their allergens.
     `;
 
     const response = await ai.models.generateContent({
@@ -99,11 +117,9 @@ export const generateDietWithAI = async (
     });
 
     const text = response.text || "[]";
-    // Clean up potential markdown formatting if the model still includes it
     const cleanText = text.replace(/```json/g, '').replace(/```/g, '').trim();
     const result: Meal[] = JSON.parse(cleanText);
     
-    // Safety check
     if (!Array.isArray(result) || result.length === 0) {
       throw new Error("Invalid AI response format");
     }

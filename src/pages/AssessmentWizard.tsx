@@ -11,7 +11,7 @@ import { Button } from '../components/ui/Button';
 // --- DATA CONSTANTS ---
 const TRAINING_TYPES = ['Gym', 'Home Workout', 'CrossFit', 'Running', 'Cycling', 'Yoga', 'Sports', 'No Exercise'];
 const ACTIVITY_LEVELS = ['Sedentary', 'Lightly Active', 'Moderately Active', 'Very Active', 'Athlete'];
-const BUDGETS = ['₹100', '₹200', '₹300', '₹500', '₹700+'];
+const BUDGETS = ['₹50-₹75', '₹100', '₹200', '₹300', '₹500', '₹700+'];
 const DIET_TYPES = ['Veg', 'Non-Veg', 'Both'];
 const CUISINES = ['South Indian', 'North Indian', 'Mixed Indian', 'International'];
 

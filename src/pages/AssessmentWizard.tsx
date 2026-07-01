@@ -379,41 +379,34 @@ const Step3 = ({ data, update }: any) => {
       </div>
 
       <div className="space-y-8 pt-8 border-t border-zinc-900">
-        <div className="bg-zinc-900/30 p-4 rounded-xl border border-zinc-800/50 mb-6 flex justify-between items-center text-sm">
-          <span className="text-zinc-400">Rate your foods:</span>
-          <div className="flex gap-4 font-medium">
-            <span className="text-pink-500">❤️ Love</span>
-            <span className="text-green-500">👍 Like</span>
-            <span className="text-yellow-500">😐 Neutral</span>
-            <span className="text-red-500">🚫 Avoid</span>
-          </div>
+        <div className="bg-zinc-900/30 p-4 rounded-xl border border-zinc-800/50 mb-6 flex flex-col sm:flex-row justify-between sm:items-center text-sm gap-2">
+          <span className="text-zinc-400 font-bold uppercase tracking-widest text-xs">Rate your foods</span>
+          <span className="text-zinc-500 text-xs">Select your preference for each item to tune the AI.</span>
         </div>
 
         {Object.entries(FOODS).map(([category, foods]) => (
           <div key={category} className="space-y-4">
-            <h3 className="text-xl font-bold border-b border-zinc-800 pb-2">{category}</h3>
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+            <h3 className="text-xl font-black text-white border-b border-zinc-800 pb-2">{category}</h3>
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-3">
               {foods.map(food => {
                 const current = data.foodPreferences[food] || 'Neutral';
                 return (
-                  <div key={food} className="flex items-center justify-between p-3 rounded-lg bg-zinc-950 border border-zinc-900 hover:border-zinc-700 transition-colors">
-                    <span className="text-sm font-medium text-zinc-300">{food}</span>
-                    <div className="flex bg-zinc-900 rounded-md p-1 gap-1">
+                  <div key={food} className="flex flex-col sm:flex-row sm:items-center justify-between p-4 rounded-xl bg-zinc-950 border border-zinc-900 hover:border-zinc-700 transition-colors gap-3">
+                    <span className="text-sm font-bold text-zinc-300">{food}</span>
+                    <div className="flex bg-zinc-900 rounded-lg p-1 w-full sm:w-auto">
                       {[
-                        { val: 'Love', emoji: '❤️', color: 'bg-pink-500/20 text-pink-500' },
-                        { val: 'Like', emoji: '👍', color: 'bg-green-500/20 text-green-500' },
-                        { val: 'Neutral', emoji: '😐', color: 'bg-yellow-500/20 text-yellow-500' },
-                        { val: 'Avoid', emoji: '🚫', color: 'bg-red-500/20 text-red-500' }
+                        { val: 'Love', label: 'Prefer', activeClass: 'bg-[#CCFF00] text-black font-bold shadow-sm' },
+                        { val: 'Neutral', label: 'Neutral', activeClass: 'bg-zinc-700 text-white font-bold shadow-sm' },
+                        { val: 'Avoid', label: 'Avoid', activeClass: 'bg-[#FF3366] text-white font-bold shadow-sm' }
                       ].map(opt => (
                         <button
                           key={opt.val}
                           onClick={() => setFoodPref(food, opt.val as PreferenceLevel)}
-                          className={`w-8 h-8 rounded flex items-center justify-center text-xs transition-colors ${
-                            current === opt.val ? opt.color : 'text-zinc-500 hover:bg-zinc-800'
+                          className={`flex-1 sm:w-20 py-1.5 text-xs rounded-md transition-all duration-200 text-center ${
+                            current === opt.val ? opt.activeClass : 'text-zinc-500 hover:text-zinc-300'
                           }`}
-                          title={opt.val}
                         >
-                          {opt.emoji}
+                          {opt.label}
                         </button>
                       ))}
                     </div>

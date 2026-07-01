@@ -25,7 +25,7 @@ const GOALS = [
 ];
 
 const FOODS = {
-  Protein: ['Chicken', 'Eggs', 'Paneer', 'Milk', 'Curd', 'Greek Yogurt', 'Tofu', 'Soy Chunks', 'Dal (Lentils)', 'Chickpeas', 'Rajma', 'Sprouts', 'Mutton', 'Fish', 'Whey Protein'],
+  Protein: ['Chicken', 'Eggs', 'Paneer', 'Milk', 'Curd', 'Greek Yogurt', 'Tofu', 'Soy Chunks', 'Dal (Lentils)', 'Chickpeas', 'Rajma', 'Sprouts', 'Mutton', 'Fish'],
   Carbohydrates: ['White Rice', 'Brown Rice', 'Roti / Chapati', 'Oats', 'Potato', 'Sweet Potato', 'Poha', 'Upma', 'Bread', 'Millets', 'Quinoa'],
   Fats: ['Peanut Butter', 'Peanuts', 'Ghee', 'Butter', 'Cheese', 'Olive Oil', 'Almonds', 'Walnuts', 'Mixed Seeds', 'Avocado'],
   Fruits: ['Banana', 'Apple', 'Orange', 'Mango', 'Papaya', 'Watermelon', 'Guava', 'Grapes', 'Pomegranate'],

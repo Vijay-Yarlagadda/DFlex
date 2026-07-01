@@ -25,11 +25,11 @@ const GOALS = [
 ];
 
 const FOODS = {
-  Protein: ['Chicken', 'Eggs', 'Paneer', 'Milk', 'Curd', 'Greek Yogurt', 'Tofu', 'Soy Chunks', 'Dal (Lentils)', 'Chickpeas', 'Rajma', 'Sprouts', 'Mutton', 'Fish'],
-  Carbohydrates: ['White Rice', 'Brown Rice', 'Roti / Chapati', 'Oats', 'Potato', 'Sweet Potato', 'Poha', 'Upma', 'Bread', 'Millets', 'Quinoa'],
-  Fats: ['Peanut Butter', 'Peanuts', 'Ghee', 'Butter', 'Cheese', 'Olive Oil', 'Almonds', 'Walnuts', 'Mixed Seeds', 'Avocado'],
-  Fruits: ['Banana', 'Apple', 'Orange', 'Mango', 'Papaya', 'Watermelon', 'Guava', 'Grapes', 'Pomegranate'],
-  Vegetables: ['Spinach', 'Broccoli', 'Carrot', 'Beans', 'Cabbage', 'Cauliflower', 'Capsicum', 'Tomato', 'Cucumber', 'Mushroom', 'Onion']
+  Protein: ['Chicken', 'Eggs', 'Paneer', 'Milk', 'Curd', 'Soy Chunks', 'Dal (Lentils)', 'Chickpeas', 'Sprouts', 'Mutton'],
+  Carbohydrates: ['White Rice', 'Brown Rice', 'Roti / Chapati', 'Oats', 'Potato', 'Sweet Potato', 'Bread', 'Quinoa'],
+  Fats: ['Peanut Butter', 'Peanuts', 'Ghee', 'Butter', 'Cheese', 'Almonds', 'Walnuts'],
+  Fruits: ['Banana', 'Apple', 'Papaya', 'Watermelon'],
+  Vegetables: ['Carrot', 'Beetroot', 'Beans', 'Broccoli']
 };
 
 const ALLERGIES = ['Milk', 'Eggs', 'Peanuts', 'Tree Nuts', 'Soy', 'Gluten', 'Seafood', 'None'];

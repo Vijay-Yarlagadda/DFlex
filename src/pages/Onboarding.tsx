@@ -6,6 +6,13 @@ import { Button } from '../components/ui/button';
 import { ArrowRight } from 'lucide-react';
 import { WaveBackground } from '../components/layout/WaveBackground';
 
+const InputGroup = ({ label, children }: { label: string, children: React.ReactNode }) => (
+  <div className="space-y-3">
+    <label className="block text-sm font-bold text-zinc-400 uppercase tracking-widest">{label}</label>
+    {children}
+  </div>
+);
+
 export const Onboarding = () => {
   const navigate = useNavigate();
   const { user } = useUser();
@@ -50,13 +57,6 @@ export const Onboarding = () => {
 
     navigate('/dashboard');
   };
-
-  const InputGroup = ({ label, children }: { label: string, children: React.ReactNode }) => (
-    <div className="space-y-3">
-      <label className="block text-sm font-bold text-zinc-400 uppercase tracking-widest">{label}</label>
-      {children}
-    </div>
-  );
 
   return (
     <div className="min-h-screen bg-black text-white flex items-center justify-center p-4 relative overflow-hidden">

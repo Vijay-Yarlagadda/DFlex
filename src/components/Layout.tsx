@@ -35,9 +35,19 @@ export const Layout = () => {
           <NavItem to="/profile" icon={<User size={20} />} label="Profile" />
         </nav>
 
-        <div className="p-6 mt-auto border-t border-zinc-900 flex items-center justify-between">
-          <span className="text-zinc-400 font-bold text-sm">My Account</span>
-          <UserButton afterSignOutUrl="/" />
+        <div className="p-4 mt-auto border-t border-zinc-900">
+          <UserButton 
+            afterSignOutUrl="/" 
+            showName={true}
+            appearance={{
+              elements: {
+                rootBox: "w-full",
+                userButtonTrigger: "w-full flex items-center justify-start gap-3 p-3 rounded-xl hover:bg-zinc-900/80 border border-transparent hover:border-zinc-800 transition-colors",
+                userButtonOuterIdentifier: "text-zinc-300 font-bold text-sm",
+                userButtonAvatarBox: "w-8 h-8"
+              }
+            }}
+          />
         </div>
       </aside>
 

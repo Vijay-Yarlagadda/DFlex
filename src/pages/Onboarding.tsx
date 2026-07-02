@@ -3,7 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { useUser } from '@clerk/clerk-react';
 import { useAppStore } from '../lib/store';
 import { Button } from '../components/ui/button';
-import { ArrowRight } from 'lucide-react';
+import { ArrowRight, ChevronDown } from 'lucide-react';
 import { WaveBackground } from '../components/layout/WaveBackground';
 
 const InputGroup = ({ label, children }: { label: string, children: React.ReactNode }) => (
@@ -118,14 +118,17 @@ export const Onboarding = () => {
                     placeholder="e.g. 175"
                     required
                   />
-                  <select 
-                    value={formData.heightUnit} 
-                    onChange={e => update('heightUnit', e.target.value)}
-                    className="bg-zinc-900/80 border border-zinc-800 rounded-xl pl-3 pr-2 py-3 text-white focus:outline-none focus:border-[#CCFF00]"
-                  >
-                    <option value="cm">cm</option>
-                    <option value="ft">ft/in</option>
-                  </select>
+                  <div className="relative">
+                    <select 
+                      value={formData.heightUnit} 
+                      onChange={e => update('heightUnit', e.target.value)}
+                      className="appearance-none bg-zinc-900/80 border border-zinc-800 rounded-xl pl-4 pr-10 py-3 text-white focus:outline-none focus:border-[#CCFF00] font-bold"
+                    >
+                      <option value="cm">cm</option>
+                      <option value="ft">ft/in</option>
+                    </select>
+                    <ChevronDown className="absolute right-3 top-1/2 -translate-y-1/2 text-zinc-500 pointer-events-none" size={16} />
+                  </div>
                 </div>
               </InputGroup>
 
@@ -140,14 +143,17 @@ export const Onboarding = () => {
                     placeholder="e.g. 70"
                     required
                   />
-                  <select 
-                    value={formData.weightUnit} 
-                    onChange={e => update('weightUnit', e.target.value)}
-                    className="bg-zinc-900/80 border border-zinc-800 rounded-xl pl-3 pr-2 py-3 text-white focus:outline-none focus:border-[#CCFF00]"
-                  >
-                    <option value="kg">kg</option>
-                    <option value="lbs">lbs</option>
-                  </select>
+                  <div className="relative">
+                    <select 
+                      value={formData.weightUnit} 
+                      onChange={e => update('weightUnit', e.target.value)}
+                      className="appearance-none bg-zinc-900/80 border border-zinc-800 rounded-xl pl-4 pr-10 py-3 text-white focus:outline-none focus:border-[#CCFF00] font-bold"
+                    >
+                      <option value="kg">kg</option>
+                      <option value="lbs">lbs</option>
+                    </select>
+                    <ChevronDown className="absolute right-3 top-1/2 -translate-y-1/2 text-zinc-500 pointer-events-none" size={16} />
+                  </div>
                 </div>
               </InputGroup>
             </div>

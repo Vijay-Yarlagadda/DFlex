@@ -121,7 +121,7 @@ export const Onboarding = () => {
                   <select 
                     value={formData.heightUnit} 
                     onChange={e => update('heightUnit', e.target.value)}
-                    className="w-20 bg-zinc-900/80 border border-zinc-800 rounded-xl px-2 py-3 text-white focus:outline-none focus:border-[#CCFF00]"
+                    className="bg-zinc-900/80 border border-zinc-800 rounded-xl pl-3 pr-2 py-3 text-white focus:outline-none focus:border-[#CCFF00]"
                   >
                     <option value="cm">cm</option>
                     <option value="ft">ft/in</option>
@@ -143,7 +143,7 @@ export const Onboarding = () => {
                   <select 
                     value={formData.weightUnit} 
                     onChange={e => update('weightUnit', e.target.value)}
-                    className="w-20 bg-zinc-900/80 border border-zinc-800 rounded-xl px-2 py-3 text-white focus:outline-none focus:border-[#CCFF00]"
+                    className="bg-zinc-900/80 border border-zinc-800 rounded-xl pl-3 pr-2 py-3 text-white focus:outline-none focus:border-[#CCFF00]"
                   >
                     <option value="kg">kg</option>
                     <option value="lbs">lbs</option>

@@ -3,7 +3,7 @@ import { motion } from 'framer-motion';
 
 export const WaveBackground = () => {
   return (
-    <div className="absolute inset-0 overflow-hidden bg-[#09090B] pointer-events-none flex items-center justify-center -z-10">
+    <div className="absolute inset-0 overflow-hidden bg-[#09090B] pointer-events-none flex items-center justify-center">
       {/* Background glow to mimic Clerk's dark depth */}
       <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[800px] h-[600px] bg-[#CCFF00]/5 blur-[120px] rounded-full" />
       

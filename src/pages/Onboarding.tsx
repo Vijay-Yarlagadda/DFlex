@@ -114,14 +114,14 @@ export const Onboarding = () => {
                     step="0.01"
                     value={formData.height} 
                     onChange={e => update('height', e.target.value)}
-                    className="flex-1 bg-zinc-900/80 border border-zinc-800 rounded-xl px-4 py-3 text-white focus:outline-none focus:border-[#CCFF00] transition-colors"
+                    className="flex-1 min-w-0 bg-zinc-900/80 border border-zinc-800 rounded-xl px-4 py-3 text-white focus:outline-none focus:border-[#CCFF00] transition-colors"
                     placeholder="e.g. 175"
                     required
                   />
                   <select 
                     value={formData.heightUnit} 
                     onChange={e => update('heightUnit', e.target.value)}
-                    className="w-24 bg-zinc-900/80 border border-zinc-800 rounded-xl px-4 py-3 text-white focus:outline-none focus:border-[#CCFF00]"
+                    className="w-20 bg-zinc-900/80 border border-zinc-800 rounded-xl px-2 py-3 text-white focus:outline-none focus:border-[#CCFF00]"
                   >
                     <option value="cm">cm</option>
                     <option value="ft">ft/in</option>
@@ -136,14 +136,14 @@ export const Onboarding = () => {
                     step="0.1"
                     value={formData.weight} 
                     onChange={e => update('weight', e.target.value)}
-                    className="flex-1 bg-zinc-900/80 border border-zinc-800 rounded-xl px-4 py-3 text-white focus:outline-none focus:border-[#CCFF00] transition-colors"
+                    className="flex-1 min-w-0 bg-zinc-900/80 border border-zinc-800 rounded-xl px-4 py-3 text-white focus:outline-none focus:border-[#CCFF00] transition-colors"
                     placeholder="e.g. 70"
                     required
                   />
                   <select 
                     value={formData.weightUnit} 
                     onChange={e => update('weightUnit', e.target.value)}
-                    className="w-24 bg-zinc-900/80 border border-zinc-800 rounded-xl px-4 py-3 text-white focus:outline-none focus:border-[#CCFF00]"
+                    className="w-20 bg-zinc-900/80 border border-zinc-800 rounded-xl px-2 py-3 text-white focus:outline-none focus:border-[#CCFF00]"
                   >
                     <option value="kg">kg</option>
                     <option value="lbs">lbs</option>

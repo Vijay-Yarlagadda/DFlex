@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
 import { 
@@ -6,7 +6,7 @@ import {
   HeartPulse, Sparkles, Dumbbell, Home, Bike, Footprints
 } from 'lucide-react';
 import { useAppStore, type UserData, type GoalType, type PreferenceLevel, computeMetrics } from '../lib/store';
-import { Button } from '../components/ui/Button';
+import { Button } from '../components/ui/button';
 
 // --- DATA CONSTANTS ---
 const TRAINING_TYPES = ['Gym', 'Home Workout', 'CrossFit', 'Running', 'Cycling', 'Yoga', 'Sports', 'No Exercise'];
@@ -44,30 +44,39 @@ const SPICE_LEVELS = ['Low', 'Medium', 'High'];
 
 export const AssessmentWizard = () => {
   const navigate = useNavigate();
-  const { updateUserData } = useAppStore();
+  const { userData, updateUserData } = useAppStore();
   const [step, setStep] = useState(1);
 
-  // Default State
+  // Default State initialized with existing user data if available
   const [data, setData] = useState<UserData>({
-    name: '', age: 25, gender: 'Male',
-    height: 175, heightUnit: 'cm',
-    weight: 70, weightUnit: 'kg',
-    trainingType: 'Gym', activityLevel: 'Moderately Active',
-    workoutDays: 4, mealsPerDay: 4, budget: '₹300',
-    goal: 'Lean Cut',
-    dietType: 'Non-Veg', cuisinePreference: 'Mixed Indian',
-    foodPreferences: {}, supplements: ['None'],
-    allergies: ['None'], medicalConditions: ['None'],
-    waterIntakeGoal: '3L', sleepDuration: '7 hrs',
-    smoking: 'Never', alcohol: 'Never',
-    cookingTime: '30 min', spicePreference: 'Medium'
+    name: userData?.name || '', 
+    dob: userData?.dob || '2000-01-01', 
+    gender: userData?.gender || 'Male',
+    height: userData?.height || 175, 
+    heightUnit: userData?.heightUnit || 'cm',
+    weight: userData?.weight || 70, 
+    weightUnit: userData?.weightUnit || 'kg',
+    trainingType: userData?.trainingType || 'Gym', 
+    activityLevel: userData?.activityLevel || 'Moderately Active',
+    workoutDays: userData?.workoutDays || 4, 
+    mealsPerDay: userData?.mealsPerDay || 4, 
+    budget: userData?.budget || '₹300',
+    goal: userData?.goal || 'Lean Cut',
+    dietType: userData?.dietType || 'Non-Veg', 
+    cuisinePreference: userData?.cuisinePreference || 'Mixed Indian',
+    foodPreferences: userData?.foodPreferences || {}, 
+    supplements: userData?.supplements || ['None'],
+    allergies: userData?.allergies || ['None'], 
+    medicalConditions: userData?.medicalConditions || ['None'],
+    waterIntakeGoal: userData?.waterIntakeGoal || '3L', 
+    sleepDuration: userData?.sleepDuration || '7 hrs',
+    smoking: userData?.smoking || 'Never', 
+    alcohol: userData?.alcohol || 'Never',
+    cookingTime: userData?.cookingTime || '30 min', 
+    spicePreference: userData?.spicePreference || 'Medium'
   });
 
   const nextStep = () => {
-    if (step === 1 && (!data.name || !data.age || !data.height || !data.weight)) {
-      alert("Please fill out all basic details.");
-      return;
-    }
     setStep(prev => prev + 1);
     window.scrollTo({ top: 0, behavior: 'smooth' });
   };
@@ -102,11 +111,11 @@ export const AssessmentWizard = () => {
   const renderProgress = () => (
     <div className="mb-8">
       <div className="flex justify-between text-xs font-bold text-zinc-500 uppercase tracking-widest mb-3">
-        <span>Step {step} of 5</span>
-        <span>{Math.round((step / 5) * 100)}%</span>
+        <span>Step {step} of 4</span>
+        <span>{Math.round((step / 4) * 100)}%</span>
       </div>
       <div className="h-1.5 w-full bg-zinc-900 rounded-full overflow-hidden flex gap-1">
-        {[1, 2, 3, 4, 5].map(i => (
+        {[1, 2, 3, 4].map(i => (
           <div key={i} className={`flex-1 h-full rounded-full transition-colors duration-500 ${i <= step ? 'bg-[#00E5FF] shadow-[0_0_10px_rgba(0,229,255,0.5)]' : 'bg-transparent'}`} />
         ))}
       </div>
@@ -128,9 +137,8 @@ export const AssessmentWizard = () => {
           >
             {step === 1 && <Step1 data={data} update={update} />}
             {step === 2 && <Step2 data={data} update={update} />}
-            {step === 3 && <Step3 data={data} update={update} />}
-            {step === 4 && <Step4 data={data} update={update} toggle={toggleArrayItem} />}
-            {step === 5 && <Step5 data={data} />}
+            {step === 3 && <Step3 data={data} update={update} toggle={toggleArrayItem} />}
+            {step === 4 && <Step4 data={data} />}
           </motion.div>
         </AnimatePresence>
 
@@ -141,7 +149,7 @@ export const AssessmentWizard = () => {
             </Button>
           ) : <div />}
           
-          {step < 5 ? (
+          {step < 4 ? (
             <Button onClick={nextStep} className="bg-white text-black hover:bg-zinc-200">
               Continue <ChevronRight size={18} className="ml-2" />
             </Button>
@@ -208,118 +216,6 @@ const MultiPillSelect = ({ options, value, onToggle }: { options: string[], valu
 );
 
 const Step1 = ({ data, update }: any) => (
-  <div className="space-y-10">
-    <div>
-      <h2 className="text-3xl font-black mb-2 tracking-tight">Basic Profile</h2>
-      <p className="text-zinc-400 text-lg">Let's establish your baseline metrics.</p>
-    </div>
-
-    <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-      <InputGroup label="Name">
-        <input 
-          type="text" 
-          value={data.name} 
-          onChange={e => update('name', e.target.value)}
-          placeholder="John Doe"
-          className="w-full bg-zinc-900/50 border border-zinc-800 rounded-xl px-4 py-3 text-white focus:outline-none focus:border-white transition-colors"
-        />
-      </InputGroup>
-
-      <InputGroup label="Age">
-        <input 
-          type="number" 
-          value={data.age || ''} 
-          onChange={e => update('age', parseInt(e.target.value))}
-          className="w-full bg-zinc-900/50 border border-zinc-800 rounded-xl px-4 py-3 text-white focus:outline-none focus:border-white transition-colors"
-        />
-      </InputGroup>
-    </div>
-
-    <InputGroup label="Gender">
-      <div className="flex gap-4">
-        {['Male', 'Female', 'Other'].map(g => (
-          <label key={g} className={`flex-1 flex items-center justify-center p-4 rounded-xl border cursor-pointer transition-all ${data.gender === g ? 'bg-white text-black border-white' : 'bg-zinc-900/50 border-zinc-800 text-zinc-400 hover:border-zinc-600'}`}>
-            <input type="radio" name="gender" className="hidden" checked={data.gender === g} onChange={() => update('gender', g)} />
-            <span className="font-bold">{g}</span>
-          </label>
-        ))}
-      </div>
-    </InputGroup>
-
-    <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-      <InputGroup label="Height">
-        <div className="flex gap-2">
-          <input 
-            type="number" 
-            value={data.height || ''} 
-            onChange={e => update('height', parseFloat(e.target.value))}
-            className="flex-1 bg-zinc-900/50 border border-zinc-800 rounded-xl px-4 py-3 text-white focus:outline-none focus:border-white transition-colors"
-          />
-          <select 
-            value={data.heightUnit} 
-            onChange={e => update('heightUnit', e.target.value)}
-            className="w-24 bg-zinc-900/50 border border-zinc-800 rounded-xl px-4 py-3 text-white focus:outline-none focus:border-white"
-          >
-            <option value="cm">cm</option>
-            <option value="ft">ft/in</option>
-          </select>
-        </div>
-      </InputGroup>
-
-      <InputGroup label="Weight">
-        <div className="flex gap-2">
-          <input 
-            type="number" 
-            value={data.weight || ''} 
-            onChange={e => update('weight', parseFloat(e.target.value))}
-            className="flex-1 bg-zinc-900/50 border border-zinc-800 rounded-xl px-4 py-3 text-white focus:outline-none focus:border-white transition-colors"
-          />
-          <select 
-            value={data.weightUnit} 
-            onChange={e => update('weightUnit', e.target.value)}
-            className="w-24 bg-zinc-900/50 border border-zinc-800 rounded-xl px-4 py-3 text-white focus:outline-none focus:border-white"
-          >
-            <option value="kg">kg</option>
-            <option value="lbs">lbs</option>
-          </select>
-        </div>
-      </InputGroup>
-    </div>
-
-    <InputGroup label="Primary Training Type">
-      <PillSelect options={TRAINING_TYPES} value={data.trainingType} onChange={v => update('trainingType', v)} />
-    </InputGroup>
-
-    <InputGroup label="Activity Level (Outside Training)">
-      <PillSelect options={ACTIVITY_LEVELS} value={data.activityLevel} onChange={v => update('activityLevel', v)} />
-    </InputGroup>
-
-    <InputGroup label="Workout Days Per Week">
-      <div className="flex gap-2">
-        {[0,1,2,3,4,5,6,7].map(d => (
-          <button
-            key={d}
-            onClick={() => update('workoutDays', d)}
-            className={`w-10 h-10 rounded-full flex items-center justify-center font-bold transition-all ${data.workoutDays === d ? 'bg-[#CCFF00] text-black shadow-[0_0_15px_rgba(204,255,0,0.3)]' : 'bg-zinc-900 border border-zinc-800 text-zinc-400 hover:text-white'}`}
-          >
-            {d}
-          </button>
-        ))}
-      </div>
-    </InputGroup>
-    
-    <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-      <InputGroup label="Meals Per Day">
-        <PillSelect options={['3','4','5','6']} value={data.mealsPerDay.toString()} onChange={v => update('mealsPerDay', parseInt(v))} />
-      </InputGroup>
-      <InputGroup label="Daily Food Budget">
-        <PillSelect options={BUDGETS} value={data.budget} onChange={v => update('budget', v)} />
-      </InputGroup>
-    </div>
-  </div>
-);
-
-const Step2 = ({ data, update }: any) => (
   <div className="space-y-8">
     <div>
       <h2 className="text-3xl font-black mb-2 tracking-tight">Fitness Goal</h2>
@@ -354,10 +250,36 @@ const Step2 = ({ data, update }: any) => (
         );
       })}
     </div>
+    
+    <div className="space-y-8 pt-8 border-t border-zinc-900 mt-8">
+        <h3 className="text-xl font-bold">Activity & Training</h3>
+        
+        <InputGroup label="Primary Training Type">
+          <PillSelect options={TRAINING_TYPES} value={data.trainingType} onChange={v => update('trainingType', v)} />
+        </InputGroup>
+
+        <InputGroup label="Activity Level (Outside Training)">
+          <PillSelect options={ACTIVITY_LEVELS} value={data.activityLevel} onChange={v => update('activityLevel', v)} />
+        </InputGroup>
+
+        <InputGroup label="Workout Days Per Week">
+          <div className="flex gap-2">
+            {[0,1,2,3,4,5,6,7].map(d => (
+              <button
+                key={d}
+                onClick={() => update('workoutDays', d)}
+                className={`w-10 h-10 rounded-full flex items-center justify-center font-bold transition-all ${data.workoutDays === d ? 'bg-[#CCFF00] text-black shadow-[0_0_15px_rgba(204,255,0,0.3)]' : 'bg-zinc-900 border border-zinc-800 text-zinc-400 hover:text-white'}`}
+              >
+                {d}
+              </button>
+            ))}
+          </div>
+        </InputGroup>
+    </div>
   </div>
 );
 
-const Step3 = ({ data, update }: any) => {
+const Step2 = ({ data, update }: any) => {
   const setFoodPref = (food: string, level: PreferenceLevel) => {
     update('foodPreferences', { ...data.foodPreferences, [food]: level });
   };
@@ -421,7 +343,7 @@ const Step3 = ({ data, update }: any) => {
   );
 };
 
-const Step4 = ({ data, update, toggle }: any) => (
+const Step3 = ({ data, update, toggle }: any) => (
   <div className="space-y-10">
     <div>
       <h2 className="text-3xl font-black mb-2 tracking-tight">Health & Lifestyle</h2>
@@ -460,6 +382,15 @@ const Step4 = ({ data, update, toggle }: any) => (
       </div>
       
       <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+        <InputGroup label="Meals Per Day">
+          <PillSelect options={['3','4','5','6']} value={data.mealsPerDay.toString()} onChange={v => update('mealsPerDay', parseInt(v))} />
+        </InputGroup>
+        <InputGroup label="Daily Food Budget">
+          <PillSelect options={BUDGETS} value={data.budget} onChange={v => update('budget', v)} />
+        </InputGroup>
+      </div>
+      
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
         <InputGroup label="Available Cooking Time">
           <PillSelect options={COOKING_TIMES} value={data.cookingTime} onChange={v => update('cookingTime', v)} />
         </InputGroup>
@@ -471,10 +402,18 @@ const Step4 = ({ data, update, toggle }: any) => (
   </div>
 );
 
-const Step5 = ({ data }: { data: UserData }) => {
+const Step4 = ({ data }: { data: UserData }) => {
   const metrics = computeMetrics(data);
   const lovedCount = Object.values(data.foodPreferences).filter(v => v === 'Love').length;
   const avoidedCount = Object.values(data.foodPreferences).filter(v => v === 'Avoid').length;
+
+  const calculateAge = (dob: string) => {
+    if (!dob) return 25;
+    const diff_ms = Date.now() - new Date(dob).getTime();
+    const age_dt = new Date(diff_ms); 
+    return Math.abs(age_dt.getUTCFullYear() - 1970);
+  };
+  const age = calculateAge(data.dob);
 
   return (
     <div className="space-y-8">
@@ -490,7 +429,7 @@ const Step5 = ({ data }: { data: UserData }) => {
         <div className="flex flex-col md:flex-row justify-between items-start md:items-center border-b border-zinc-800 pb-6 mb-6 gap-4">
           <div>
             <h3 className="text-2xl font-bold text-white mb-1">{data.name}</h3>
-            <p className="text-zinc-400">{data.age} yrs • {data.gender} • {data.height}{data.heightUnit} • {data.weight}{data.weightUnit}</p>
+            <p className="text-zinc-400">{age} yrs • {data.gender} • {data.height}{data.heightUnit} • {data.weight}{data.weightUnit}</p>
           </div>
           <div className="px-4 py-2 bg-white text-black rounded-lg font-bold text-sm uppercase tracking-wider">
             {data.goal}

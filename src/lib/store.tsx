@@ -6,7 +6,7 @@ export type PreferenceLevel = 'Love' | 'Like' | 'Neutral' | 'Avoid';
 export interface UserData {
   // Basic Profile
   name: string;
-  age: number;
+  dob: string;
   gender: 'Male' | 'Female' | 'Other';
   height: number;
   heightUnit: 'cm' | 'ft';
@@ -109,7 +109,15 @@ export const computeMetrics = (user: UserData): DashboardMetrics => {
   const heightInM = heightInCm / 100;
   const bmi = weightInKg / (heightInM * heightInM);
   
-  let bmr = 10 * weightInKg + 6.25 * heightInCm - 5 * user.age;
+  const calculateAge = (dob: string) => {
+    if (!dob) return 25;
+    const diff_ms = Date.now() - new Date(dob).getTime();
+    const age_dt = new Date(diff_ms); 
+    return Math.abs(age_dt.getUTCFullYear() - 1970);
+  };
+  const age = calculateAge(user.dob);
+
+  let bmr = 10 * weightInKg + 6.25 * heightInCm - 5 * age;
   bmr += user.gender === 'Male' ? 5 : -161;
   
   const activityMultipliers: Record<string, number> = {

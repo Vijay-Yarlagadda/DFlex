@@ -1,184 +1,162 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { motion, AnimatePresence } from 'framer-motion';
-import { ArrowRight, ArrowLeft, Activity } from 'lucide-react';
+import { useUser } from '@clerk/clerk-react';
+import { useAppStore } from '../lib/store';
 import { Button } from '../components/ui/button';
-import { Input } from '../components/ui/input';
-
-const goals = ['Cut (Lose Fat)', 'Maintain', 'Bulk (Gain Muscle)'];
-const activityLevels = ['Sedentary', 'Lightly Active', 'Moderately Active', 'Very Active', 'Extreme Athlete'];
+import { ArrowRight } from 'lucide-react';
+import { WaveBackground } from '../components/layout/WaveBackground';
 
 export const Onboarding = () => {
   const navigate = useNavigate();
-  const [step, setStep] = useState(1);
-  
-  const handleNext = (e: React.FormEvent) => {
-    e.preventDefault();
-    if (step < 3) {
-      setStep(step + 1);
-    } else {
-      // Final step: generate plan and redirect
-      navigate('/dashboard');
+  const { user } = useUser();
+  const { updateUserData } = useAppStore();
+
+  const [formData, setFormData] = useState({
+    name: '',
+    gender: 'Male',
+    dob: '',
+    height: '',
+    heightUnit: 'cm',
+    weight: '',
+    weightUnit: 'kg'
+  });
+
+  useEffect(() => {
+    if (user && user.firstName && !formData.name) {
+      setFormData(prev => ({ ...prev, name: user.fullName || user.firstName || '' }));
     }
+  }, [user]);
+
+  const update = (field: string, value: any) => {
+    setFormData(prev => ({ ...prev, [field]: value }));
   };
 
+  const handleFinish = (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!formData.name || !formData.dob || !formData.height || !formData.weight) {
+      alert("Please fill out all details to continue.");
+      return;
+    }
+
+    updateUserData({
+      name: formData.name,
+      gender: formData.gender as 'Male' | 'Female' | 'Other',
+      dob: formData.dob,
+      height: parseFloat(formData.height),
+      heightUnit: formData.heightUnit as 'cm' | 'ft',
+      weight: parseFloat(formData.weight),
+      weightUnit: formData.weightUnit as 'kg' | 'lbs',
+    });
+
+    navigate('/dashboard');
+  };
+
+  const InputGroup = ({ label, children }: { label: string, children: React.ReactNode }) => (
+    <div className="space-y-3">
+      <label className="block text-sm font-bold text-zinc-400 uppercase tracking-widest">{label}</label>
+      {children}
+    </div>
+  );
+
   return (
-    <div className="min-h-screen bg-background flex flex-col">
-      {/* Header */}
-      <header className="p-6 flex justify-between items-center border-b border-border/50">
-        <div className="flex items-center gap-2">
-          <div className="bg-[var(--color-primary)] p-1.5 rounded-sm text-black skew-btn">
-            <div className="skew-btn-content"><Activity size={20} /></div>
-          </div>
-          <span className="text-xl font-black tracking-tighter uppercase italic">DFlex</span>
-        </div>
-        <div className="text-sm font-bold text-muted uppercase tracking-widest">
-          Step {step} of 3
-        </div>
-      </header>
+    <div className="min-h-screen bg-black text-white flex items-center justify-center p-4 relative overflow-hidden">
+      <WaveBackground />
+      <div className="w-full max-w-xl bg-zinc-950/80 border border-zinc-800 rounded-3xl p-6 md:p-8 shadow-2xl backdrop-blur-xl relative z-10">
+        
+        <div className="absolute top-0 right-0 w-64 h-64 bg-[#CCFF00]/10 rounded-full blur-[100px] pointer-events-none" />
+        <div className="absolute bottom-0 left-0 w-64 h-64 bg-[#FF3366]/10 rounded-full blur-[100px] pointer-events-none" />
+        
+        <div className="relative z-10">
+          <h1 className="text-3xl font-black mb-2 tracking-tighter uppercase text-center">Welcome to DFlex</h1>
+          <p className="text-zinc-400 text-base mb-8 font-medium text-center">Let's set up your basic athlete profile.</p>
 
-      {/* Main Content */}
-      <div className="flex-1 flex flex-col justify-center items-center p-6">
-        <div className="w-full max-w-xl">
-          <div className="w-full bg-border h-1.5 rounded-full overflow-hidden mb-12">
-            <div 
-              className="h-full bg-[var(--color-primary)] transition-all duration-500"
-              style={{ width: `${(step / 3) * 100}%` }}
-            />
-          </div>
+          <form onSubmit={handleFinish} className="space-y-6">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+              <InputGroup label="Full Name">
+                <input 
+                  type="text" 
+                  value={formData.name} 
+                  onChange={e => update('name', e.target.value)}
+                  placeholder="John Doe"
+                  className="w-full bg-zinc-900/80 border border-zinc-800 rounded-xl px-4 py-3 text-white focus:outline-none focus:border-[#CCFF00] transition-colors"
+                  required
+                />
+              </InputGroup>
 
-          <AnimatePresence mode="wait">
-            <motion.div
-              key={step}
-              initial={{ opacity: 0, x: 20 }}
-              animate={{ opacity: 1, x: 0 }}
-              exit={{ opacity: 0, x: -20 }}
-              transition={{ duration: 0.3 }}
-            >
-              <form onSubmit={handleNext} className="space-y-8">
-                {step === 1 && (
-                  <>
-                    <div>
-                      <h2 className="text-4xl font-black uppercase tracking-tighter mb-2">Physical Metrics</h2>
-                      <p className="text-muted font-medium">We need this to calculate your BMI and BMR accurately.</p>
-                    </div>
-                    
-                    <div className="grid grid-cols-2 gap-6">
-                      <div className="space-y-2">
-                        <label className="text-xs font-bold uppercase tracking-wider text-muted">Age</label>
-                        <Input type="number" placeholder="25" className="h-14 bg-card" required />
-                      </div>
-                      <div className="space-y-2">
-                        <label className="text-xs font-bold uppercase tracking-wider text-muted">Gender</label>
-                        <select className="flex h-14 w-full rounded-xl border border-border bg-card px-4 py-2 text-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--color-primary)] transition-all">
-                          <option>Male</option>
-                          <option>Female</option>
-                          <option>Other</option>
-                        </select>
-                      </div>
-                      <div className="space-y-2">
-                        <label className="text-xs font-bold uppercase tracking-wider text-muted">Height (cm)</label>
-                        <Input type="number" placeholder="180" className="h-14 bg-card" required />
-                      </div>
-                      <div className="space-y-2">
-                        <label className="text-xs font-bold uppercase tracking-wider text-muted">Weight (kg)</label>
-                        <Input type="number" placeholder="80" className="h-14 bg-card" required />
-                      </div>
-                    </div>
-                  </>
-                )}
+              <InputGroup label="Date of Birth">
+                <input 
+                  type="date" 
+                  style={{ colorScheme: 'dark' }}
+                  value={formData.dob} 
+                  onChange={e => update('dob', e.target.value)}
+                  className="w-full bg-zinc-900/80 border border-zinc-800 rounded-xl px-4 py-3 text-white focus:outline-none focus:border-[#CCFF00] transition-colors [&::-webkit-calendar-picker-indicator]:opacity-50 hover:[&::-webkit-calendar-picker-indicator]:opacity-100"
+                  required
+                />
+              </InputGroup>
+            </div>
 
-                {step === 2 && (
-                  <>
-                    <div>
-                      <h2 className="text-4xl font-black uppercase tracking-tighter mb-2">Lifestyle & Goals</h2>
-                      <p className="text-muted font-medium">Tell us about your activity levels and primary objective.</p>
-                    </div>
-                    
-                    <div className="space-y-6">
-                      <div className="space-y-3">
-                        <label className="text-xs font-bold uppercase tracking-wider text-muted">Primary Goal</label>
-                        <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
-                          {goals.map(g => (
-                            <button key={g} type="button" className="p-4 rounded-lg border-2 border-border bg-card text-center hover:border-[var(--color-primary)] hover:text-[var(--color-primary)] font-bold transition-all focus:border-[var(--color-primary)] focus:text-[var(--color-primary)] focus:bg-[var(--color-primary)]/10">
-                              {g}
-                            </button>
-                          ))}
-                        </div>
-                      </div>
+            <InputGroup label="Biological Sex">
+              <div className="flex gap-4">
+                {['Male', 'Female', 'Other'].map(g => (
+                  <label key={g} className={`flex-1 flex items-center justify-center p-4 rounded-xl border cursor-pointer transition-all ${formData.gender === g ? 'bg-white text-black border-white shadow-lg' : 'bg-zinc-900/80 border-zinc-800 text-zinc-400 hover:border-zinc-600'}`}>
+                    <input type="radio" name="gender" className="hidden" checked={formData.gender === g} onChange={() => update('gender', g)} />
+                    <span className="font-bold">{g}</span>
+                  </label>
+                ))}
+              </div>
+            </InputGroup>
 
-                      <div className="space-y-2">
-                        <label className="text-xs font-bold uppercase tracking-wider text-muted">Activity Level</label>
-                        <select className="flex h-14 w-full rounded-xl border border-border bg-card px-4 py-2 text-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--color-primary)] transition-all">
-                          {activityLevels.map(lvl => <option key={lvl}>{lvl}</option>)}
-                        </select>
-                      </div>
-                    </div>
-                  </>
-                )}
-
-                {step === 3 && (
-                  <>
-                    <div>
-                      <h2 className="text-4xl font-black uppercase tracking-tighter mb-2">Diet Preferences</h2>
-                      <p className="text-muted font-medium">Fine-tune the AI to your exact eating habits.</p>
-                    </div>
-                    
-                    <div className="space-y-6">
-                      <div className="space-y-2">
-                        <label className="text-xs font-bold uppercase tracking-wider text-muted">Diet Type</label>
-                        <select className="flex h-14 w-full rounded-xl border border-border bg-card px-4 py-2 text-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--color-primary)] transition-all">
-                          <option>Standard (No restrictions)</option>
-                          <option>Vegetarian</option>
-                          <option>Vegan</option>
-                          <option>Keto</option>
-                          <option>Paleo</option>
-                        </select>
-                      </div>
-
-                      <div className="space-y-2">
-                        <label className="text-xs font-bold uppercase tracking-wider text-muted">Allergies / Dislikes (Optional)</label>
-                        <Input type="text" placeholder="e.g. Peanuts, Shellfish, Mushrooms" className="h-14 bg-card" />
-                      </div>
-
-                      <div className="grid grid-cols-2 gap-6">
-                        <div className="space-y-2">
-                          <label className="text-xs font-bold uppercase tracking-wider text-muted">Meals per day</label>
-                          <select className="flex h-14 w-full rounded-xl border border-border bg-card px-4 py-2 text-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--color-primary)] transition-all">
-                            <option>3 Meals</option>
-                            <option>4 Meals</option>
-                            <option>5 Meals</option>
-                          </select>
-                        </div>
-                        <div className="space-y-2">
-                          <label className="text-xs font-bold uppercase tracking-wider text-muted">Daily Budget</label>
-                          <select className="flex h-14 w-full rounded-xl border border-border bg-card px-4 py-2 text-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--color-primary)] transition-all">
-                            <option>Low ($10-$15)</option>
-                            <option>Medium ($15-$25)</option>
-                            <option>High ($25+)</option>
-                          </select>
-                        </div>
-                      </div>
-                    </div>
-                  </>
-                )}
-
-                <div className="flex items-center justify-between pt-8 border-t border-border/50">
-                  {step > 1 ? (
-                    <Button type="button" variant="ghost" onClick={() => setStep(step - 1)}>
-                      <ArrowLeft size={18} className="mr-2" /> Back
-                    </Button>
-                  ) : (
-                    <div /> // Spacer
-                  )}
-                  <Button type="submit" size="lg">
-                    {step === 3 ? 'GENERATE PROTOCOL' : 'CONTINUE'} 
-                    {step < 3 && <ArrowRight size={18} className="ml-2" />}
-                  </Button>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+              <InputGroup label="Height">
+                <div className="flex gap-2">
+                  <input 
+                    type="number" 
+                    step="0.01"
+                    value={formData.height} 
+                    onChange={e => update('height', e.target.value)}
+                    className="flex-1 bg-zinc-900/80 border border-zinc-800 rounded-xl px-4 py-3 text-white focus:outline-none focus:border-[#CCFF00] transition-colors"
+                    placeholder="e.g. 175"
+                    required
+                  />
+                  <select 
+                    value={formData.heightUnit} 
+                    onChange={e => update('heightUnit', e.target.value)}
+                    className="w-24 bg-zinc-900/80 border border-zinc-800 rounded-xl px-4 py-3 text-white focus:outline-none focus:border-[#CCFF00]"
+                  >
+                    <option value="cm">cm</option>
+                    <option value="ft">ft/in</option>
+                  </select>
                 </div>
-              </form>
-            </motion.div>
-          </AnimatePresence>
+              </InputGroup>
+
+              <InputGroup label="Current Weight">
+                <div className="flex gap-2">
+                  <input 
+                    type="number" 
+                    step="0.1"
+                    value={formData.weight} 
+                    onChange={e => update('weight', e.target.value)}
+                    className="flex-1 bg-zinc-900/80 border border-zinc-800 rounded-xl px-4 py-3 text-white focus:outline-none focus:border-[#CCFF00] transition-colors"
+                    placeholder="e.g. 70"
+                    required
+                  />
+                  <select 
+                    value={formData.weightUnit} 
+                    onChange={e => update('weightUnit', e.target.value)}
+                    className="w-24 bg-zinc-900/80 border border-zinc-800 rounded-xl px-4 py-3 text-white focus:outline-none focus:border-[#CCFF00]"
+                  >
+                    <option value="kg">kg</option>
+                    <option value="lbs">lbs</option>
+                  </select>
+                </div>
+              </InputGroup>
+            </div>
+
+            <Button type="submit" size="lg" className="w-full mt-6 bg-[#CCFF00] hover:bg-[#b3ff00] text-black font-black uppercase tracking-widest text-lg shadow-[0_0_20px_rgba(204,255,0,0.3)]">
+              Enter Dashboard <ArrowRight className="ml-2" size={20} />
+            </Button>
+            
+          </form>
         </div>
       </div>
     </div>

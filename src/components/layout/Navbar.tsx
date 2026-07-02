@@ -16,7 +16,7 @@ export const Navbar = () => {
     return () => window.removeEventListener('scroll', handleScroll);
   }, []);
 
-  const isAuthPage = location.pathname === '/login' || location.pathname === '/register';
+  const isAuthPage = location.pathname.startsWith('/sign-in') || location.pathname.startsWith('/sign-up');
   const isDashboardPage = location.pathname.startsWith('/dashboard') || location.pathname.startsWith('/plan') || location.pathname.startsWith('/progress') || location.pathname.startsWith('/coach') || location.pathname.startsWith('/profile');
 
   if (isAuthPage || isDashboardPage) return null; // We use separate layouts for these
@@ -44,10 +44,10 @@ export const Navbar = () => {
           </div>
           
           <div className="flex items-center gap-4 border-l border-border pl-6">
-            <Link to="/login">
+            <Link to="/sign-in">
               <Button variant="ghost">Sign In</Button>
             </Link>
-            <Link to="/register">
+            <Link to="/sign-up">
               <Button>Get Started</Button>
             </Link>
           </div>
@@ -68,10 +68,10 @@ export const Navbar = () => {
           <a href="#features" className="text-lg font-medium p-2" onClick={() => setIsMobileMenuOpen(false)}>Features</a>
           <a href="#how-it-works" className="text-lg font-medium p-2" onClick={() => setIsMobileMenuOpen(false)}>How it works</a>
           <div className="h-px bg-border my-2" />
-          <Link to="/login" onClick={() => setIsMobileMenuOpen(false)}>
+          <Link to="/sign-in" onClick={() => setIsMobileMenuOpen(false)}>
             <Button variant="outline" className="w-full justify-center">Sign In</Button>
           </Link>
-          <Link to="/register" onClick={() => setIsMobileMenuOpen(false)}>
+          <Link to="/sign-up" onClick={() => setIsMobileMenuOpen(false)}>
             <Button className="w-full justify-center">Get Started</Button>
           </Link>
         </div>

@@ -3,6 +3,7 @@ import { motion } from 'framer-motion';
 import { ArrowRight, Apple, Zap, Activity } from 'lucide-react';
 import { Button } from '../components/ui/button';
 import { Navbar } from '../components/layout/Navbar';
+import { AnimatedGrid } from '../components/layout/AnimatedGrid';
 import { Link } from 'react-router-dom';
 
 export const Landing = () => {
@@ -12,6 +13,8 @@ export const Landing = () => {
       
       {/* Hero Section */}
       <section className="relative pt-32 pb-20 lg:pt-48 lg:pb-32 px-6">
+        <AnimatedGrid />
+        
         <div className="absolute top-1/4 left-1/2 -translate-x-1/2 w-[800px] h-[400px] bg-[var(--color-primary)] blur-[200px] opacity-10 pointer-events-none" />
         <div className="absolute bottom-0 right-0 w-[600px] h-[400px] bg-[var(--color-secondary)] blur-[200px] opacity-10 pointer-events-none" />
         

@@ -2,30 +2,47 @@ import React from 'react';
 import { NavLink } from 'react-router-dom';
 import { Home, Utensils, Droplet, User, Activity } from 'lucide-react';
 import { Outlet } from 'react-router-dom';
+import { UserButton } from '@clerk/clerk-react';
 
 export const Layout = () => {
   return (
-    <div className="min-h-screen bg-black text-zinc-50 pb-20 md:pb-0 md:flex">
+    <div className="min-h-screen bg-black text-zinc-50 pb-20 md:pb-0 md:flex flex-col md:flex-row">
+      {/* Mobile Top Header */}
+      <header className="md:hidden flex items-center justify-between p-4 bg-zinc-950 border-b border-zinc-900 sticky top-0 z-50">
+        <div className="flex items-center gap-2">
+          <div className="w-6 h-6 bg-[#CCFF00] rounded-sm skew-x-[-10deg] flex items-center justify-center">
+            <span className="text-black font-black text-sm skew-x-[10deg]">D</span>
+          </div>
+          <span className="text-lg font-black tracking-tighter uppercase text-white">DFlex</span>
+        </div>
+        <UserButton afterSignOutUrl="/" />
+      </header>
+
       {/* Desktop Sidebar (hidden on mobile) */}
-      <aside className="hidden md:flex flex-col w-64 bg-zinc-950 border-r border-zinc-900 min-h-screen p-4">
-        <div className="flex items-center gap-2 mb-8 px-2">
+      <aside className="hidden md:flex flex-col w-64 bg-zinc-950 border-r border-zinc-900 min-h-screen">
+        <div className="flex items-center gap-2 p-6">
           <div className="w-8 h-8 bg-[#CCFF00] rounded-sm skew-x-[-10deg] flex items-center justify-center">
             <span className="text-black font-black text-xl skew-x-[10deg]">D</span>
           </div>
           <span className="text-2xl font-black tracking-tighter uppercase text-white">DFlex</span>
         </div>
         
-        <nav className="flex-1 space-y-2">
+        <nav className="flex-1 space-y-2 px-4 mt-4">
           <NavItem to="/dashboard" icon={<Home size={20} />} label="Dashboard" />
           <NavItem to="/diet" icon={<Utensils size={20} />} label="Diet Plan" />
           <NavItem to="/progress" icon={<Activity size={20} />} label="Progress" />
           <NavItem to="/water" icon={<Droplet size={20} />} label="Water" />
           <NavItem to="/profile" icon={<User size={20} />} label="Profile" />
         </nav>
+
+        <div className="p-6 mt-auto border-t border-zinc-900 flex items-center justify-between">
+          <span className="text-zinc-400 font-bold text-sm">My Account</span>
+          <UserButton afterSignOutUrl="/" />
+        </div>
       </aside>
 
       {/* Main Content Area */}
-      <main className="flex-1 overflow-y-auto">
+      <main className="flex-1 overflow-y-auto relative">
         <Outlet />
       </main>
 

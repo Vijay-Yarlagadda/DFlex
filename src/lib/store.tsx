@@ -95,30 +95,34 @@ const LOCAL_STORAGE_KEY = 'dflex_state_v3';
 const getTodayString = () => new Date().toISOString().split('T')[0];
 
 // Pure function to calculate metrics (used by store AND Review step)
-export const computeMetrics = (user: UserData): DashboardMetrics => {
+export const computeMetrics = (user: Partial<UserData>): DashboardMetrics => {
   // Normalize units
-  const weightInKg = user.weightUnit === 'lbs' ? user.weight * 0.453592 : user.weight;
-  let heightInCm = user.height;
+  const rawWeight = user.weight || 70;
+  const weightInKg = user.weightUnit === 'lbs' ? rawWeight * 0.453592 : rawWeight;
+  
+  let rawHeight = user.height || 175;
+  let heightInCm = rawHeight;
   if (user.heightUnit === 'ft') {
     // For simplicity, if they entered 5.11 we treat it as 5 feet 11 inches
-    const ft = Math.floor(user.height);
-    const inches = Math.round((user.height - ft) * 100); 
+    const ft = Math.floor(rawHeight);
+    const inches = Math.round((rawHeight - ft) * 100); 
     heightInCm = (ft * 30.48) + (inches * 2.54);
   }
 
   const heightInM = heightInCm / 100;
   const bmi = weightInKg / (heightInM * heightInM);
   
-  const calculateAge = (dob: string) => {
+  const calculateAge = (dob?: string) => {
     if (!dob) return 25;
     const diff_ms = Date.now() - new Date(dob).getTime();
+    if (isNaN(diff_ms)) return 25;
     const age_dt = new Date(diff_ms); 
     return Math.abs(age_dt.getUTCFullYear() - 1970);
   };
   const age = calculateAge(user.dob);
 
   let bmr = 10 * weightInKg + 6.25 * heightInCm - 5 * age;
-  bmr += user.gender === 'Male' ? 5 : -161;
+  bmr += user.gender === 'Female' ? -161 : 5;
   
   const activityMultipliers: Record<string, number> = {
     'Sedentary': 1.2, 
@@ -127,25 +131,28 @@ export const computeMetrics = (user: UserData): DashboardMetrics => {
     'Very Active': 1.725, 
     'Athlete': 1.9,
   };
-  const tdee = bmr * (activityMultipliers[user.activityLevel] || 1.2);
+  const activityLevel = user.activityLevel || 'Moderately Active';
+  const tdee = bmr * (activityMultipliers[activityLevel] || 1.2);
   
+  const goal = user.goal || 'Maintenance';
   let targetCalories = tdee;
-  if (user.goal === 'Lean Bulk') targetCalories += 300;
-  if (user.goal === 'Dirty Bulk') targetCalories += 500;
-  if (user.goal === 'Lean Cut') targetCalories -= 300;
-  if (user.goal === 'Fat Loss') targetCalories -= 500;
+  if (goal === 'Lean Bulk') targetCalories += 300;
+  if (goal === 'Dirty Bulk') targetCalories += 500;
+  if (goal === 'Lean Cut') targetCalories -= 300;
+  if (goal === 'Fat Loss') targetCalories -= 500;
   // Maintenance and Body Recomposition stay roughly at TDEE
 
   let pRatio = 0.3, cRatio = 0.4, fRatio = 0.3;
-  if (user.goal.includes('Bulk')) { pRatio = 0.25; cRatio = 0.5; fRatio = 0.25; }
-  if (user.goal.includes('Loss') || user.goal.includes('Cut') || user.goal === 'Body Recomposition') { 
+  if (goal.includes('Bulk')) { pRatio = 0.25; cRatio = 0.5; fRatio = 0.25; }
+  if (goal.includes('Loss') || goal.includes('Cut') || goal === 'Body Recomposition') { 
     pRatio = 0.4; cRatio = 0.3; fRatio = 0.3; 
   }
 
   const protein = (targetCalories * pRatio) / 4;
   const carbs = (targetCalories * cRatio) / 4;
   const fat = (targetCalories * fRatio) / 9;
-  const waterGoal = (weightInKg * 35) + (user.workoutDays > 0 ? 500 : 0);
+  const workoutDays = user.workoutDays || 0;
+  const waterGoal = (weightInKg * 35) + (workoutDays > 0 ? 500 : 0);
 
   return {
     bmi: Math.round(bmi * 10) / 10,

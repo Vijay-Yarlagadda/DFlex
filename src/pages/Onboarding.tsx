@@ -21,7 +21,9 @@ export const Onboarding = () => {
   const [formData, setFormData] = useState({
     name: '',
     gender: 'Male',
-    dob: '',
+    dobD: '',
+    dobM: '',
+    dobY: '',
     height: '',
     heightUnit: 'cm',
     weight: '',
@@ -40,15 +42,17 @@ export const Onboarding = () => {
 
   const handleFinish = (e: React.FormEvent) => {
     e.preventDefault();
-    if (!formData.name || !formData.dob || !formData.height || !formData.weight) {
+    if (!formData.name || !formData.dobD || !formData.dobM || !formData.dobY || !formData.height || !formData.weight) {
       alert("Please fill out all details to continue.");
       return;
     }
 
+    const formattedDob = `${formData.dobY}-${formData.dobM.padStart(2, '0')}-${formData.dobD.padStart(2, '0')}`;
+
     updateUserData({
       name: formData.name,
       gender: formData.gender as 'Male' | 'Female' | 'Other',
-      dob: formData.dob,
+      dob: formattedDob,
       height: parseFloat(formData.height),
       heightUnit: formData.heightUnit as 'cm' | 'ft',
       weight: parseFloat(formData.weight),
@@ -84,14 +88,32 @@ export const Onboarding = () => {
               </InputGroup>
 
               <InputGroup label="Date of Birth">
-                <input 
-                  type="date" 
-                  style={{ colorScheme: 'dark' }}
-                  value={formData.dob} 
-                  onChange={e => update('dob', e.target.value)}
-                  className="w-full bg-zinc-900/80 border border-zinc-800 rounded-xl px-4 py-3 text-white focus:outline-none focus:border-[#CCFF00] transition-colors [&::-webkit-calendar-picker-indicator]:opacity-50 hover:[&::-webkit-calendar-picker-indicator]:opacity-100"
-                  required
-                />
+                <div className="flex gap-2">
+                  <input 
+                    type="number" 
+                    placeholder="DD"
+                    value={formData.dobD} 
+                    onChange={e => update('dobD', e.target.value)}
+                    className="flex-1 min-w-0 bg-zinc-900/80 border border-zinc-800 rounded-xl px-2 text-center py-3 text-white focus:outline-none focus:border-[#CCFF00] transition-colors"
+                    required
+                  />
+                  <input 
+                    type="number" 
+                    placeholder="MM"
+                    value={formData.dobM} 
+                    onChange={e => update('dobM', e.target.value)}
+                    className="flex-1 min-w-0 bg-zinc-900/80 border border-zinc-800 rounded-xl px-2 text-center py-3 text-white focus:outline-none focus:border-[#CCFF00] transition-colors"
+                    required
+                  />
+                  <input 
+                    type="number" 
+                    placeholder="YYYY"
+                    value={formData.dobY} 
+                    onChange={e => update('dobY', e.target.value)}
+                    className="flex-[1.5] min-w-0 bg-zinc-900/80 border border-zinc-800 rounded-xl px-2 text-center py-3 text-white focus:outline-none focus:border-[#CCFF00] transition-colors"
+                    required
+                  />
+                </div>
               </InputGroup>
             </div>
 

@@ -10,8 +10,18 @@ export const DietPage = () => {
   const { userData, metrics, dietPlan, dailyLogs, toggleMeal } = useAppStore();
   const navigate = useNavigate();
 
-  if (!userData || !metrics || dietPlan.length === 0) {
-    return <Navigate to="/generating" />;
+  if (!userData || !metrics) {
+    return <Navigate to="/assessment" />;
+  }
+
+  if (dietPlan.length === 0) {
+    return (
+      <div className="p-4 md:p-8 max-w-5xl mx-auto space-y-6 pb-24 text-center mt-20">
+        <h2 className="text-2xl font-black text-white mb-4">No Diet Plan Generated Yet</h2>
+        <p className="text-zinc-400 mb-8">You need to generate your personalized AI protocol.</p>
+        <Button onClick={() => navigate('/generating')}>Generate My AI Diet</Button>
+      </div>
+    );
   }
 
   const today = new Date().toISOString().split('T')[0];

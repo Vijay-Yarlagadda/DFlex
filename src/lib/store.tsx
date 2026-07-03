@@ -67,14 +67,12 @@ export interface DailyLog {
 }
 
 interface AppState {
-  apiKey: string;
   userData: UserData | null;
   metrics: DashboardMetrics | null;
   dietPlan: Meal[];
   dailyLogs: Record<string, DailyLog>; 
   waterIntake: number;
   
-  setApiKey: (key: string) => void;
   updateUserData: (data: Partial<UserData>) => void;
   setMetrics: (metrics: DashboardMetrics) => void;
   setDietPlan: (plan: Meal[]) => void;
@@ -98,7 +96,6 @@ const getTodayString = () => new Date().toISOString().split('T')[0];
 // This file only stores the resulting metrics.
 
 export const AppProvider = ({ children }: { children: ReactNode }) => {
-  const [apiKey, setApiKeyState] = useState<string>('');
   const [userData, setUserData] = useState<UserData | null>(null);
   const [metrics, setMetrics] = useState<DashboardMetrics | null>(null);
   const [dietPlan, setDietPlanState] = useState<Meal[]>([]);
@@ -110,7 +107,6 @@ export const AppProvider = ({ children }: { children: ReactNode }) => {
     if (saved) {
       try {
         const parsed = JSON.parse(saved);
-        if (parsed.apiKey) setApiKeyState(parsed.apiKey);
         if (parsed.userData) setUserData(parsed.userData);
         if (parsed.metrics) setMetrics(parsed.metrics);
         if (parsed.dietPlan) setDietPlanState(parsed.dietPlan);
@@ -127,9 +123,9 @@ export const AppProvider = ({ children }: { children: ReactNode }) => {
   }, []);
 
   useEffect(() => {
-    const stateToSave = { apiKey, userData, metrics, dietPlan, dailyLogs };
+    const stateToSave = { userData, metrics, dietPlan, dailyLogs };
     localStorage.setItem(LOCAL_STORAGE_KEY, JSON.stringify(stateToSave));
-  }, [apiKey, userData, metrics, dietPlan, dailyLogs]);
+  }, [userData, metrics, dietPlan, dailyLogs]);
 
   useEffect(() => {
     const today = getTodayString();
@@ -142,8 +138,6 @@ export const AppProvider = ({ children }: { children: ReactNode }) => {
       };
     });
   }, [waterIntake, userData?.weight]);
-
-  const setApiKey = (key: string) => setApiKeyState(key);
 
   const updateUserData = (data: Partial<UserData>) => {
     setUserData(prev => {
@@ -186,7 +180,6 @@ export const AppProvider = ({ children }: { children: ReactNode }) => {
   };
 
   const clearData = () => {
-    setApiKey('');
     setUserData(null);
     setMetrics(null);
     setDietPlanState([]);
@@ -197,8 +190,8 @@ export const AppProvider = ({ children }: { children: ReactNode }) => {
 
   return (
     <AppContext.Provider value={{
-      apiKey, userData, metrics, dietPlan, dailyLogs, waterIntake,
-      setApiKey, updateUserData, setMetrics, setDietPlan,
+      userData, metrics, dietPlan, dailyLogs, waterIntake,
+      updateUserData, setMetrics, setDietPlan,
       addWater, resetWater, toggleMeal, logWeight, clearData
     }}>
       {children}

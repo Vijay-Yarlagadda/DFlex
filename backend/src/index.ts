@@ -18,6 +18,13 @@ connectDB();
 app.use(cors());
 app.use(express.json());
 
+// Debug Auth
+app.use((req, res, next) => {
+  console.log(`[${req.method}] ${req.url}`);
+  console.log(`Auth Header:`, req.headers.authorization ? 'Present (length ' + req.headers.authorization.length + ')' : 'Missing');
+  next();
+});
+
 // Health check (before auth)
 app.get('/health', (req, res) => {
   res.status(200).json({ status: 'OK' });
@@ -27,6 +34,11 @@ app.get('/favicon.ico', (req, res) => res.status(204).end());
 
 // Apply Clerk middleware globally so we can access req.auth in protected routes
 app.use(clerkAuth);
+
+app.use((req, res, next) => {
+  console.log(`Clerk Auth Object:`, (req as any).auth);
+  next();
+});
 
 // Routes
 app.use('/api', dietRoutes);

@@ -1,5 +1,6 @@
 import { Request, Response } from 'express';
 import { z } from 'zod';
+import { getAuth } from '@clerk/express';
 import User from '../models/User';
 import DietPlan from '../models/DietPlan';
 import { generateDietFromAI } from '../services/aiService';
@@ -83,8 +84,10 @@ export const calculatePreview = async (req: Request, res: Response): Promise<voi
 };
 
 export const generateDiet = async (req: Request, res: Response): Promise<void> => {
+  console.log("➡️ Received request to /api/generate-diet");
   try {
-    const clerkId = req.auth.userId;
+    const clerkId = getAuth(req).userId;
+    console.log("👤 User Clerk ID:", clerkId);
     if (!clerkId) {
       res.status(401).json({ error: "Unauthorized" });
       return;
@@ -208,7 +211,7 @@ export const generateDiet = async (req: Request, res: Response): Promise<void> =
 
 export const getDiet = async (req: Request, res: Response): Promise<void> => {
   try {
-    const clerkId = req.auth.userId;
+    const clerkId = getAuth(req).userId;
     const user = await User.findOne({ clerkId });
     if (!user) {
       res.status(404).json({ error: "User not found" });
@@ -229,7 +232,7 @@ export const getDiet = async (req: Request, res: Response): Promise<void> => {
 
 export const updateProfile = async (req: Request, res: Response): Promise<void> => {
   try {
-    const clerkId = req.auth.userId;
+    const clerkId = getAuth(req).userId;
     const user = await User.findOneAndUpdate({ clerkId }, req.body, { new: true, upsert: true });
     res.json(user);
   } catch (error) {

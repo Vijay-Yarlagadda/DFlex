@@ -6,24 +6,20 @@ import { Button } from '../components/ui/Button';
 import { User, Target, Scale, LogOut, Key, Settings2 } from 'lucide-react';
 
 export const Profile = () => {
-  const { userData, updateUserData, clearData, calculateMetrics, apiKey, setApiKey } = useAppStore();
+  const { userData, updateUserData, clearData } = useAppStore();
   const navigate = useNavigate();
   
+  const [weight, setWeight] = useState(userData?.weight || 0);
+  const [goal, setGoal] = useState<GoalType>(userData?.goal || 'Maintenance');
+
   if (!userData) {
     return <Navigate to="/assessment" />;
   }
-
-  const [weight, setWeight] = useState(userData.weight);
-  const [goal, setGoal] = useState<GoalType>(userData.goal);
-  const [apiInput, setApiInput] = useState(apiKey || '');
-
   const handleSave = () => {
-    setApiKey(apiInput);
     updateUserData({
       weight,
       goal,
     });
-    calculateMetrics();
     navigate('/dashboard');
   };
 
@@ -33,7 +29,6 @@ export const Profile = () => {
   };
 
   const retest = () => {
-    clearData(); // They need to re-do the whole wizard if they want to change deep preferences
     navigate('/assessment');
   };
 
@@ -98,25 +93,6 @@ export const Profile = () => {
               <option>Body Recomposition</option>
             </select>
           </div>
-        </div>
-
-        <div className="pt-6 border-t border-zinc-800">
-          <h3 className="text-white font-bold mb-4 flex items-center gap-2 uppercase tracking-wide text-sm">
-            <Key size={16} className="text-[#00E5FF]" /> AI Configuration
-          </h3>
-          <label className="block text-zinc-400 text-xs font-bold mb-2 uppercase">
-            Gemini API Key
-          </label>
-          <input 
-            type="password" 
-            className="w-full bg-zinc-950 border border-zinc-800 rounded-lg px-4 py-3 text-white focus:outline-none focus:border-[#00E5FF] mb-4 text-sm font-mono"
-            value={apiInput}
-            onChange={e => setApiInput(e.target.value)}
-            placeholder="AI_xxxxxxxxxxxxxxxxxxxxxx"
-          />
-          <p className="text-zinc-500 text-xs mb-6">
-            Your API key is stored securely in your browser's local storage and is never sent to our servers. Leave blank to use the offline algorithm.
-          </p>
         </div>
 
         <div className="pt-6 border-t border-zinc-800">

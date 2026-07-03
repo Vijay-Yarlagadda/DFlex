@@ -59,7 +59,7 @@ export const Onboarding = () => {
       weightUnit: formData.weightUnit as 'kg' | 'lbs',
     });
 
-    navigate('/dashboard');
+    setTimeout(() => navigate('/dashboard'), 50);
   };
 
   return (

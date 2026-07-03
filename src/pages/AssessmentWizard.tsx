@@ -48,6 +48,12 @@ export const AssessmentWizard = () => {
   const { userData, updateUserData } = useAppStore();
   const [step, setStep] = useState(1);
 
+  useEffect(() => {
+    if (!userData || !userData.name) {
+      navigate('/onboarding');
+    }
+  }, [userData, navigate]);
+
   // Default State initialized with existing user data if available
   const [data, setData] = useState<UserData>({
     name: userData?.name || '', 
@@ -89,7 +95,7 @@ export const AssessmentWizard = () => {
 
   const handleFinish = () => {
     updateUserData(data);
-    navigate('/generating');
+    setTimeout(() => navigate('/generating'), 50);
   };
 
   const update = (field: keyof UserData, value: any) => {

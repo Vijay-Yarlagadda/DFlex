@@ -20,9 +20,14 @@ export const AILoadingScreen = () => {
   const { getToken } = useAuth();
   const navigate = useNavigate();
   const { userData, setMetrics, setDietPlan } = useAppStore();
+  const [stepIndex, setStepIndex] = useState(0);
+  const [error, setError] = useState<string | null>(null);
+  const hasFetched = React.useRef(false);
 
   useEffect(() => {
     if (!userData) return;
+    if (hasFetched.current) return;
+    hasFetched.current = true;
 
     let isMounted = true;
     
@@ -56,9 +61,11 @@ export const AILoadingScreen = () => {
           setDietPlan(json.diet);
           navigate('/diet'); 
         }
-      } catch (err) {
+      } catch (err: any) {
         console.error(err);
-        if (isMounted) navigate('/diet'); // Or an error screen
+        if (isMounted) {
+          setError(err.message || 'Failed to generate diet');
+        }
       }
     };
 
@@ -68,7 +75,7 @@ export const AILoadingScreen = () => {
       isMounted = false;
       clearInterval(interval);
     };
-  }, [userData, navigate, setDietPlan, getToken]);
+  }, [userData]);
 
   return (
     <div className="min-h-screen bg-black text-white flex flex-col items-center justify-center relative overflow-hidden">
@@ -95,19 +102,31 @@ export const AILoadingScreen = () => {
           </div>
         </div>
 
-        <div className="h-8 flex items-center justify-center overflow-hidden w-full max-w-sm">
-          <AnimatePresence mode="wait">
-            <motion.p
-              key={stepIndex}
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              exit={{ opacity: 0, y: -20 }}
-              transition={{ duration: 0.3 }}
-              className="text-zinc-300 font-bold tracking-widest uppercase text-sm text-center px-4 flex items-center gap-2"
-            >
-              <span className="text-[#CCFF00]">✓</span> {loadingSteps[stepIndex]}
-            </motion.p>
-          </AnimatePresence>
+        <div className="h-16 flex items-center justify-center w-full max-w-sm">
+          {error ? (
+            <div className="text-center">
+              <p className="text-red-500 font-bold mb-4">{error}</p>
+              <button 
+                onClick={() => navigate('/profile')}
+                className="bg-zinc-800 text-white px-4 py-2 rounded-lg text-sm hover:bg-zinc-700"
+              >
+                Go to Profile
+              </button>
+            </div>
+          ) : (
+            <AnimatePresence mode="wait">
+              <motion.p
+                key={stepIndex}
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                exit={{ opacity: 0, y: -20 }}
+                transition={{ duration: 0.3 }}
+                className="text-zinc-300 font-bold tracking-widest uppercase text-sm text-center px-4 flex items-center gap-2"
+              >
+                <span className="text-[#CCFF00]">✓</span> {loadingSteps[stepIndex]}
+              </motion.p>
+            </AnimatePresence>
+          )}
         </div>
       </div>
     </div>

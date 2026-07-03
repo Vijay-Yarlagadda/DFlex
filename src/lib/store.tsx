@@ -76,7 +76,7 @@ interface AppState {
   
   setApiKey: (key: string) => void;
   updateUserData: (data: Partial<UserData>) => void;
-  calculateMetrics: () => void;
+  setMetrics: (metrics: DashboardMetrics) => void;
   setDietPlan: (plan: Meal[]) => void;
   
   addWater: (amount: number) => void;
@@ -94,77 +94,8 @@ const LOCAL_STORAGE_KEY = 'dflex_state_v3';
 
 const getTodayString = () => new Date().toISOString().split('T')[0];
 
-// Pure function to calculate metrics (used by store AND Review step)
-export const computeMetrics = (user: Partial<UserData>): DashboardMetrics => {
-  // Normalize units
-  const rawWeight = user.weight || 70;
-  const weightInKg = user.weightUnit === 'lbs' ? rawWeight * 0.453592 : rawWeight;
-  
-  let rawHeight = user.height || 175;
-  let heightInCm = rawHeight;
-  if (user.heightUnit === 'ft') {
-    // For simplicity, if they entered 5.11 we treat it as 5 feet 11 inches
-    const ft = Math.floor(rawHeight);
-    const inches = Math.round((rawHeight - ft) * 100); 
-    heightInCm = (ft * 30.48) + (inches * 2.54);
-  }
-
-  const heightInM = heightInCm / 100;
-  const bmi = weightInKg / (heightInM * heightInM);
-  
-  const calculateAge = (dob?: string) => {
-    if (!dob) return 25;
-    const diff_ms = Date.now() - new Date(dob).getTime();
-    if (isNaN(diff_ms)) return 25;
-    const age_dt = new Date(diff_ms); 
-    return Math.abs(age_dt.getUTCFullYear() - 1970);
-  };
-  const age = calculateAge(user.dob);
-
-  let bmr = 10 * weightInKg + 6.25 * heightInCm - 5 * age;
-  bmr += user.gender === 'Female' ? -161 : 5;
-  
-  const activityMultipliers: Record<string, number> = {
-    'Sedentary': 1.2, 
-    'Lightly Active': 1.375, 
-    'Moderately Active': 1.55, 
-    'Very Active': 1.725, 
-    'Athlete': 1.9,
-  };
-  const activityLevel = user.activityLevel || 'Moderately Active';
-  const tdee = bmr * (activityMultipliers[activityLevel] || 1.2);
-  
-  const goal = user.goal || 'Maintenance';
-  let targetCalories = tdee;
-  if (goal === 'Lean Bulk') targetCalories += 300;
-  if (goal === 'Dirty Bulk') targetCalories += 500;
-  if (goal === 'Lean Cut') targetCalories -= 300;
-  if (goal === 'Fat Loss') targetCalories -= 500;
-  // Maintenance and Body Recomposition stay roughly at TDEE
-
-  let pRatio = 0.3, cRatio = 0.4, fRatio = 0.3;
-  if (goal.includes('Bulk')) { pRatio = 0.25; cRatio = 0.5; fRatio = 0.25; }
-  if (goal.includes('Loss') || goal.includes('Cut') || goal === 'Body Recomposition') { 
-    pRatio = 0.4; cRatio = 0.3; fRatio = 0.3; 
-  }
-
-  const protein = (targetCalories * pRatio) / 4;
-  const carbs = (targetCalories * cRatio) / 4;
-  const fat = (targetCalories * fRatio) / 9;
-  const workoutDays = user.workoutDays || 0;
-  const waterGoal = (weightInKg * 35) + (workoutDays > 0 ? 500 : 0);
-
-  return {
-    bmi: Math.round(bmi * 10) / 10,
-    bmr: Math.round(bmr),
-    tdee: Math.round(tdee),
-    dailyCalories: Math.round(targetCalories),
-    protein: Math.round(protein),
-    carbs: Math.round(carbs),
-    fat: Math.round(fat),
-    waterGoal: Math.round(waterGoal),
-  };
-};
+// The backend now performs all calculations.
+// This file only stores the resulting metrics.
 
 export const AppProvider = ({ children }: { children: ReactNode }) => {
   const [apiKey, setApiKeyState] = useState<string>('');
@@ -221,10 +152,7 @@ export const AppProvider = ({ children }: { children: ReactNode }) => {
     });
   };
 
-  const calculateMetrics = () => {
-    if (!userData) return;
-    setMetrics(computeMetrics(userData));
-  };
+
 
   const setDietPlan = (plan: Meal[]) => setDietPlanState(plan);
 
@@ -254,7 +182,6 @@ export const AppProvider = ({ children }: { children: ReactNode }) => {
     });
     if (date === getTodayString() && userData) {
       updateUserData({ weight });
-      calculateMetrics();
     }
   };
 
@@ -271,7 +198,7 @@ export const AppProvider = ({ children }: { children: ReactNode }) => {
   return (
     <AppContext.Provider value={{
       apiKey, userData, metrics, dietPlan, dailyLogs, waterIntake,
-      setApiKey, updateUserData, calculateMetrics, setDietPlan,
+      setApiKey, updateUserData, setMetrics, setDietPlan,
       addWater, resetWater, toggleMeal, logWeight, clearData
     }}>
       {children}

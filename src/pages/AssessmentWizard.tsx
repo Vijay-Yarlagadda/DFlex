@@ -5,7 +5,8 @@ import {
   ChevronRight, ChevronLeft, Check, Activity, Target, Utensils, 
   HeartPulse, Sparkles, Dumbbell, Home, Bike, Footprints
 } from 'lucide-react';
-import { useAppStore, type UserData, type GoalType, type PreferenceLevel, computeMetrics } from '../lib/store';
+import { useAppStore, type UserData, type GoalType, type PreferenceLevel } from '../lib/store';
+import { useAuth } from '@clerk/clerk-react';
 import { Button } from '../components/ui/button';
 
 // --- DATA CONSTANTS ---
@@ -403,7 +404,35 @@ const Step3 = ({ data, update, toggle }: any) => (
 );
 
 const Step4 = ({ data }: { data: UserData }) => {
-  const metrics = computeMetrics(data);
+  const { getToken } = useAuth();
+  const [metrics, setMetrics] = useState<any>(null);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState('');
+
+  useEffect(() => {
+    const fetchMetrics = async () => {
+      try {
+        const token = await getToken();
+        const res = await fetch('http://localhost:5000/api/calculate', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${token}`
+          },
+          body: JSON.stringify(data)
+        });
+        if (!res.ok) throw new Error('Failed to calculate metrics');
+        const json = await res.json();
+        setMetrics(json);
+      } catch (err: any) {
+        setError(err.message || 'Failed to calculate');
+      } finally {
+        setLoading(false);
+      }
+    };
+    fetchMetrics();
+  }, [data, getToken]);
+
   const lovedCount = Object.values(data.foodPreferences).filter(v => v === 'Love').length;
   const avoidedCount = Object.values(data.foodPreferences).filter(v => v === 'Avoid').length;
 
@@ -414,6 +443,25 @@ const Step4 = ({ data }: { data: UserData }) => {
     return Math.abs(age_dt.getUTCFullYear() - 1970);
   };
   const age = calculateAge(data.dob);
+
+  if (loading) {
+    return (
+      <div className="flex flex-col items-center justify-center py-20 text-center">
+        <div className="w-16 h-16 border-4 border-zinc-800 border-t-[#00E5FF] rounded-full animate-spin mb-6" />
+        <h3 className="text-xl font-bold text-white mb-2">Calculating Baseline Protocol...</h3>
+        <p className="text-zinc-500">Connecting to DFlex engine</p>
+      </div>
+    );
+  }
+
+  if (error || !metrics) {
+    return (
+      <div className="text-center py-20 text-[#FF3366]">
+        <h3 className="text-xl font-bold mb-2">Error Calculating Metrics</h3>
+        <p>{error}</p>
+      </div>
+    );
+  }
 
   return (
     <div className="space-y-8">

@@ -18,16 +18,20 @@ connectDB();
 app.use(cors());
 app.use(express.json());
 
+// Health check (before auth)
+app.get('/health', (req, res) => {
+  res.status(200).json({ status: 'OK' });
+});
+
+app.get('/favicon.ico', (req, res) => res.status(204).end());
+
 // Apply Clerk middleware globally so we can access req.auth in protected routes
 app.use(clerkAuth);
 
 // Routes
 app.use('/api', dietRoutes);
 
-// Health check
-app.get('/health', (req, res) => {
-  res.status(200).json({ status: 'OK' });
-});
+
 
 // Start Server
 app.listen(PORT, () => {

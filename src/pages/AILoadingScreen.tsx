@@ -2,7 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useAppStore } from '../lib/store';
-import { generateDietWithAI } from '../lib/ai';
+import { useAuth } from '@clerk/clerk-react';
 
 const loadingSteps = [
   "Calculating BMI...",
@@ -17,20 +17,15 @@ const loadingSteps = [
 ];
 
 export const AILoadingScreen = () => {
+  const { getToken } = useAuth();
   const navigate = useNavigate();
-  const { apiKey, userData, metrics, calculateMetrics, setDietPlan } = useAppStore();
-  const [stepIndex, setStepIndex] = useState(0);
+  const { userData, setMetrics, setDietPlan } = useAppStore();
 
   useEffect(() => {
-    calculateMetrics();
-  }, [calculateMetrics]);
-
-  useEffect(() => {
-    if (!userData || !metrics) return;
+    if (!userData) return;
 
     let isMounted = true;
     
-    // Cycle text every 1.5 seconds to ensure they see most of the steps
     const interval = setInterval(() => {
       setStepIndex((prev) => {
         if (prev < loadingSteps.length - 1) return prev + 1;
@@ -39,10 +34,31 @@ export const AILoadingScreen = () => {
     }, 1500);
 
     const fetchDiet = async () => {
-      const plan = await generateDietWithAI(apiKey, userData, metrics);
-      if (isMounted) {
-        setDietPlan(plan);
-        navigate('/diet'); 
+      try {
+        const token = await getToken();
+        const res = await fetch('http://localhost:5000/api/generate-diet', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${token}`
+          },
+          body: JSON.stringify(userData)
+        });
+        
+        if (!res.ok) {
+          throw new Error('Failed to generate diet');
+        }
+        
+        const json = await res.json();
+        
+        if (isMounted) {
+          setMetrics(json.metrics);
+          setDietPlan(json.diet);
+          navigate('/diet'); 
+        }
+      } catch (err) {
+        console.error(err);
+        if (isMounted) navigate('/diet'); // Or an error screen
       }
     };
 
@@ -52,7 +68,7 @@ export const AILoadingScreen = () => {
       isMounted = false;
       clearInterval(interval);
     };
-  }, [apiKey, userData, metrics, navigate, setDietPlan]);
+  }, [userData, navigate, setDietPlan, getToken]);
 
   return (
     <div className="min-h-screen bg-black text-white flex flex-col items-center justify-center relative overflow-hidden">

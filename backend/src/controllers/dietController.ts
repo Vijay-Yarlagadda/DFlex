@@ -41,6 +41,47 @@ const ProfileSchema = z.object({
   spicePreference: z.string()
 });
 
+export const calculatePreview = async (req: Request, res: Response): Promise<void> => {
+  try {
+    const parsedData = ProfileSchema.parse(req.body);
+    const weightKg = parsedData.weightUnit === 'lbs' ? parsedData.weight * 0.453592 : parsedData.weight;
+    
+    let heightCm = parsedData.height;
+    if (parsedData.heightUnit === 'ft') {
+      const ft = Math.floor(parsedData.height);
+      const inches = Math.round((parsedData.height - ft) * 100);
+      heightCm = (ft * 30.48) + (inches * 2.54);
+    }
+
+    const diff_ms = Date.now() - new Date(parsedData.dob || '1995-01-01').getTime();
+    const age = Math.abs(new Date(diff_ms).getUTCFullYear() - 1970);
+
+    const bmiData = calculateBMI(weightKg, heightCm);
+    const bmr = calculateBMR(weightKg, heightCm, age, parsedData.gender as any);
+    const tdee = calculateTDEE(bmr, parsedData.activityLevel);
+    const targetCalories = calculateTargetCalories(tdee, parsedData.goal as GoalType);
+    const macros = calculateMacros(targetCalories, parsedData.goal as GoalType, weightKg);
+    const water = calculateWaterIntake(weightKg, parsedData.activityLevel, parsedData.workoutDays);
+
+    res.json({
+      bmi: bmiData.value,
+      bmr,
+      tdee,
+      dailyCalories: targetCalories,
+      protein: macros.protein,
+      carbs: macros.carbs,
+      fat: macros.fat,
+      waterGoal: water.ml
+    });
+  } catch (error: any) {
+    if (error instanceof z.ZodError) {
+      res.status(400).json({ error: "Validation failed", details: error.issues });
+    } else {
+      res.status(500).json({ error: "Internal server error" });
+    }
+  }
+};
+
 export const generateDiet = async (req: Request, res: Response): Promise<void> => {
   try {
     const clerkId = req.auth.userId;

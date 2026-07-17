@@ -47,18 +47,35 @@ export const calculateTargetCalories = (tdee: number, goal: GoalType) => {
 };
 
 export const calculateMacros = (calories: number, goal: GoalType, weightKg: number) => {
-  let pRatio = 0.3, cRatio = 0.4, fRatio = 0.3;
-  
-  if (goal.includes('Bulk')) { pRatio = 0.25; cRatio = 0.5; fRatio = 0.25; }
-  else if (goal.includes('Loss') || goal.includes('Cut') || goal === 'Body Recomposition') { 
-    pRatio = 0.4; cRatio = 0.3; fRatio = 0.3; 
+  let proteinMultiplier = 1.8; // Default for maintenance
+  let fatRatio = 0.25; // 25% of calories from fat
+
+  if (goal.includes('Bulk')) { 
+    proteinMultiplier = 2.0; // 2.0g per kg for bulking
+    fatRatio = 0.25; 
+  } else if (goal.includes('Loss') || goal.includes('Cut') || goal === 'Body Recomposition') { 
+    proteinMultiplier = 2.2; // 2.2g per kg for cutting to preserve muscle
+    fatRatio = 0.30; // 30% fat to maintain healthy hormone levels on a deficit
   }
 
-  return {
-    protein: Math.round((calories * pRatio) / 4),
-    carbs: Math.round((calories * cRatio) / 4),
-    fat: Math.round((calories * fRatio) / 9)
-  };
+  // 1. Calculate Protein (based on body weight)
+  const protein = Math.round(weightKg * proteinMultiplier);
+  const proteinCalories = protein * 4;
+
+  // 2. Calculate Fat (based on percentage of total calories)
+  const fatCalories = calories * fatRatio;
+  const fat = Math.round(fatCalories / 9);
+
+  // 3. Calculate Carbs (remaining calories)
+  let carbCalories = calories - proteinCalories - fatCalories;
+  
+  // Failsafe: if calories are extremely low, ensure carbs don't go negative
+  if (carbCalories < 0) {
+    carbCalories = 0;
+  }
+  const carbs = Math.round(carbCalories / 4);
+
+  return { protein, carbs, fat };
 };
 
 export const calculateWaterIntake = (weightKg: number, activityLevel: string, workoutDays: number) => {

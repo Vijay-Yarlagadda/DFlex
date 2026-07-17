@@ -1,4 +1,3 @@
-import React from 'react';
 import { Link, useLocation } from 'react-router-dom';
 import { Activity, LayoutDashboard, Apple, LineChart, MessageSquare, Settings, User } from 'lucide-react';
 

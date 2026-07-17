@@ -1,4 +1,4 @@
-import React from 'react';
+import * as React from 'react';
 import { cn } from '../../lib/utils'; // I will create a utils file for tailwind merge
 
 interface ButtonProps extends React.ButtonHTMLAttributes<HTMLButtonElement> {

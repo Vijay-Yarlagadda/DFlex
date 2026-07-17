@@ -1,8 +1,7 @@
-import React from 'react';
 import { Navigate } from 'react-router-dom';
 import { useAppStore } from '../lib/store';
 import { ProgressRing } from '../components/ui/ProgressRing';
-import { Button } from '../components/ui/Button';
+import { Button } from '../components/ui/button';
 import { Plus, RotateCcw } from 'lucide-react';
 import { motion } from 'framer-motion';
 

@@ -1,7 +1,6 @@
-import React from 'react';
 import { Navigate } from 'react-router-dom';
 import { useAppStore } from '../lib/store';
-import { Card } from '../components/ui/Card';
+import { Card } from '../components/ui/card';
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, BarChart, Bar } from 'recharts';
 import { Activity, Flame, Droplet } from 'lucide-react';
 

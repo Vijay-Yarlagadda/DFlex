@@ -1,12 +1,12 @@
-import React, { useState } from 'react';
+import { useState } from 'react';
 import { Navigate, useNavigate } from 'react-router-dom';
 import { useAppStore } from '../lib/store';
-import { Card } from '../components/ui/Card';
-import { Activity, Flame, Target, Droplet, Dumbbell, Footprints, Info, Plus, Moon, Sparkles, RefreshCw } from 'lucide-react';
+import { Card } from '../components/ui/card';
+import { Flame, Target, Droplet, Dumbbell, Footprints, Info, Moon, Sparkles, RefreshCw } from 'lucide-react';
 import { motion } from 'framer-motion';
 
 export const Dashboard = () => {
-  const { userData, metrics, dietPlan, dailyLogs, waterIntake, addWater, updateSteps } = useAppStore();
+  const { userData, metrics, dailyLogs, waterIntake, addWater, updateSteps } = useAppStore();
   const navigate = useNavigate();
   const [stepInput, setStepInput] = useState('');
 

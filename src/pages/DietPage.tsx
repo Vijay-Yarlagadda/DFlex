@@ -1,7 +1,6 @@
-import React from 'react';
 import { Navigate, useNavigate } from 'react-router-dom';
 import { useAppStore, type Meal } from '../lib/store';
-import { Card } from '../components/ui/Card';
+import { Card } from '../components/ui/card';
 import { RefreshCw, Settings2, UtensilsCrossed, CheckCircle2, Circle, ShoppingCart, Info, Lightbulb } from 'lucide-react';
 import { motion } from 'framer-motion';
 

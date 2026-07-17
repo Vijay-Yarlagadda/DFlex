@@ -1,4 +1,3 @@
-import React from 'react';
 import { NavLink } from 'react-router-dom';
 import { Home, Utensils, Droplet, User, Activity } from 'lucide-react';
 import { Outlet } from 'react-router-dom';

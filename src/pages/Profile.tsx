@@ -1,9 +1,9 @@
-import React, { useState } from 'react';
+import { useState } from 'react';
 import { Navigate, useNavigate } from 'react-router-dom';
-import { useAppStore, type GoalType, type UserData } from '../lib/store';
-import { Card } from '../components/ui/Card';
-import { Button } from '../components/ui/Button';
-import { User, Target, Scale, LogOut, Key, Settings2 } from 'lucide-react';
+import { useAppStore, type GoalType } from '../lib/store';
+import { Card } from '../components/ui/card';
+import { Button } from '../components/ui/button';
+import { User, Target, Scale, LogOut, Settings2 } from 'lucide-react';
 
 export const Profile = () => {
   const { userData, updateUserData, clearData } = useAppStore();
@@ -56,7 +56,7 @@ export const Profile = () => {
           </div>
           <div className="flex-1">
             <h2 className="text-xl font-bold text-white">{userData.name}</h2>
-            <p className="text-zinc-400 text-sm">{userData.age} yrs • {userData.gender} • {userData.height}{userData.heightUnit}</p>
+            <p className="text-zinc-400 text-sm">{userData.gender} • {userData.height}{userData.heightUnit}</p>
           </div>
           <Button variant="outline" size="sm" onClick={retest}>
             <Settings2 size={16} className="mr-2" /> Retake Assessment

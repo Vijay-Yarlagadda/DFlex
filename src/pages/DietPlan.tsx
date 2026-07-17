@@ -1,5 +1,4 @@
-import React from 'react';
-import { Card, GlassCard } from '../components/ui/card';
+import { Card } from '../components/ui/card';
 import { Button } from '../components/ui/button';
 import { Share, Download, RefreshCw, Info, Utensils } from 'lucide-react';
 import { motion } from 'framer-motion';
@@ -64,18 +63,18 @@ export const DietPlan = () => {
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-8">
-        <GlassCard className="p-4 text-center">
+        <Card glass className="p-4 text-center">
           <p className="text-sm text-muted mb-1">Target Calories</p>
           <p className="text-2xl font-bold text-[var(--color-primary)]">2,100</p>
-        </GlassCard>
-        <GlassCard className="p-4 text-center">
+        </Card>
+        <Card glass className="p-4 text-center">
           <p className="text-sm text-muted mb-1">Protein</p>
           <p className="text-2xl font-bold text-blue-500">160g</p>
-        </GlassCard>
-        <GlassCard className="p-4 text-center">
+        </Card>
+        <Card glass className="p-4 text-center">
           <p className="text-sm text-muted mb-1">Cost Estimate</p>
           <p className="text-2xl font-bold text-emerald-500">$12/day</p>
-        </GlassCard>
+        </Card>
       </div>
 
       <div className="space-y-6">

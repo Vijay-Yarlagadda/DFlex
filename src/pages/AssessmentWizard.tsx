@@ -1,11 +1,11 @@
-import React, { useState, useEffect } from 'react';
+import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
 import { 
-  ChevronRight, ChevronLeft, Check, Activity, Target, Utensils, 
-  HeartPulse, Sparkles, Dumbbell, Home, Bike, Footprints
+  ChevronRight, ChevronLeft, Check, Activity, Target, 
+  HeartPulse, Sparkles, Dumbbell, Home
 } from 'lucide-react';
-import { useAppStore, type UserData, type GoalType, type PreferenceLevel } from '../lib/store';
+import { useAppStore, type UserData, type PreferenceLevel } from '../lib/store';
 import { useAuth } from '@clerk/clerk-react';
 import { Button } from '../components/ui/button';
 

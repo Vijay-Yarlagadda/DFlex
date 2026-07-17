@@ -1,4 +1,3 @@
-import React from 'react';
 import { Outlet, Link, useNavigate } from 'react-router-dom';
 import { Activity, ArrowLeft } from 'lucide-react';
 import { Button } from '../ui/button';

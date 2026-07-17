@@ -42,7 +42,8 @@ export const AILoadingScreen = () => {
     const fetchDiet = async () => {
       try {
         const token = await getToken();
-        const res = await fetch('http://localhost:5000/api/generate-diet', {
+        const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:5000';
+        const res = await fetch(`${API_URL}/api/generate-diet`, {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',

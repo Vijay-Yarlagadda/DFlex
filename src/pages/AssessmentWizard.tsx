@@ -432,7 +432,8 @@ const Step4 = ({ data }: { data: UserData }) => {
     const fetchMetrics = async () => {
       try {
         const token = await getToken();
-        const res = await fetch('http://localhost:5000/api/calculate', {
+        const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:5000';
+        const res = await fetch(`${API_URL}/api/calculate`, {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',

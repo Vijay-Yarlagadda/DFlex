@@ -42,6 +42,8 @@ const SMOKING_HABITS = ['Never', 'Occasionally', 'Regularly'];
 const ALCOHOL_HABITS = ['Never', 'Occasionally', 'Weekly', 'Frequently'];
 const COOKING_TIMES = ['15 min', '30 min', '45 min', '60+ min'];
 const SPICE_LEVELS = ['Low', 'Medium', 'High'];
+const AVERAGE_STEPS = ['0-3000', '3000-6000', '6000-10000', '10000+'];
+const STRESS_LEVELS = ['Low', 'Medium', 'High'];
 
 export const AssessmentWizard = () => {
   const navigate = useNavigate();
@@ -80,7 +82,9 @@ export const AssessmentWizard = () => {
     smoking: userData?.smoking || 'Never', 
     alcohol: userData?.alcohol || 'Never',
     cookingTime: userData?.cookingTime || '30 min', 
-    spicePreference: userData?.spicePreference || 'Medium'
+    spicePreference: userData?.spicePreference || 'Medium',
+    averageDailySteps: userData?.averageDailySteps || '3000-6000',
+    stressLevel: userData?.stressLevel || 'Medium'
   });
 
   const nextStep = () => {
@@ -376,6 +380,15 @@ const Step3 = ({ data, update, toggle }: any) => (
         </InputGroup>
         <InputGroup label="Sleep Duration">
           <PillSelect options={SLEEP_DURATIONS} value={data.sleepDuration} onChange={v => update('sleepDuration', v)} />
+        </InputGroup>
+      </div>
+
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+        <InputGroup label="Average Daily Steps">
+          <PillSelect options={AVERAGE_STEPS} value={data.averageDailySteps} onChange={v => update('averageDailySteps', v)} />
+        </InputGroup>
+        <InputGroup label="Stress Level">
+          <PillSelect options={STRESS_LEVELS} value={data.stressLevel} onChange={v => update('stressLevel', v)} />
         </InputGroup>
       </div>
 

@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { useUser } from '@clerk/clerk-react';
+import { useUser, useAuth } from '@clerk/clerk-react';
 import { useAppStore } from '../lib/store';
 import { Button } from '../components/ui/button';
 import { ArrowRight, ChevronDown } from 'lucide-react';
@@ -40,7 +40,9 @@ export const Onboarding = () => {
     setFormData(prev => ({ ...prev, [field]: value }));
   };
 
-  const handleFinish = (e: React.FormEvent) => {
+  const { getToken } = useAuth();
+  
+  const handleFinish = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!formData.name || !formData.dobD || !formData.dobM || !formData.dobY || !formData.height || !formData.weight) {
       alert("Please fill out all details to continue.");
@@ -48,8 +50,7 @@ export const Onboarding = () => {
     }
 
     const formattedDob = `${formData.dobY}-${formData.dobM.padStart(2, '0')}-${formData.dobD.padStart(2, '0')}`;
-
-    updateUserData({
+    const userDataToUpdate = {
       name: formData.name,
       gender: formData.gender as 'Male' | 'Female' | 'Other',
       dob: formattedDob,
@@ -57,7 +58,23 @@ export const Onboarding = () => {
       heightUnit: formData.heightUnit as 'cm' | 'ft',
       weight: parseFloat(formData.weight),
       weightUnit: formData.weightUnit as 'kg' | 'lbs',
-    });
+    };
+
+    updateUserData(userDataToUpdate);
+    
+    try {
+      const token = await getToken();
+      await fetch('http://localhost:5000/api/profile', {
+        method: 'PUT',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}`
+        },
+        body: JSON.stringify(userDataToUpdate)
+      });
+    } catch (err) {
+      console.error("Failed to save profile to backend", err);
+    }
 
     setTimeout(() => navigate('/dashboard'), 50);
   };

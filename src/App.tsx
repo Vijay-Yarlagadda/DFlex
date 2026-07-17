@@ -14,6 +14,8 @@ import { Progress } from './pages/Progress';
 import { WaterTracker } from './pages/WaterTracker';
 import { Profile } from './pages/Profile';
 import { Layout } from './components/Layout';
+import { AuthSync } from './components/AuthSync';
+import { Toaster } from 'react-hot-toast';
 
 const PUBLISHABLE_KEY = import.meta.env.VITE_CLERK_PUBLISHABLE_KEY;
 
@@ -73,7 +75,9 @@ function App() {
             <Route element={
               <>
                 <SignedIn>
-                  <Layout />
+                  <AuthSync>
+                    <Layout />
+                  </AuthSync>
                 </SignedIn>
                 <SignedOut>
                   <Navigate to="/sign-in" replace />
@@ -90,6 +94,11 @@ function App() {
             
             <Route path="*" element={<Navigate to="/" replace />} />
           </Routes>
+          <Toaster position="bottom-right" toastOptions={{
+            style: { background: '#18181B', color: '#fff', border: '1px solid #27272A' },
+            success: { iconTheme: { primary: '#CCFF00', secondary: '#000' } },
+            error: { iconTheme: { primary: '#FF3366', secondary: '#fff' } },
+          }} />
         </BrowserRouter>
       </AppProvider>
     </ClerkProvider>

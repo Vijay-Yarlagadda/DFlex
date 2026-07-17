@@ -36,6 +36,8 @@ export interface UserData {
   alcohol: string;
   cookingTime: string;
   spicePreference: string;
+  averageDailySteps: string;
+  stressLevel: string;
 }
 
 export interface DashboardMetrics {
@@ -50,7 +52,6 @@ export interface DashboardMetrics {
 }
 
 export interface Meal {
-  name: string;
   food: string;
   qty: string;
   calories: number;
@@ -59,26 +60,43 @@ export interface Meal {
   fat: number;
 }
 
+export interface DietPlanData {
+  breakfast: Meal;
+  morningSnack?: Meal;
+  lunch: Meal;
+  eveningSnack?: Meal;
+  dinner: Meal;
+  totalCalories: number;
+  totalProtein: number;
+  totalCarbs: number;
+  totalFat: number;
+  shoppingSuggestions: string[];
+  healthyAlternatives: string[];
+  nutritionTips: string[];
+}
+
 export interface DailyLog {
   date: string; // YYYY-MM-DD
   water: number;
   weight: number;
+  currentSteps: number;
   mealsEaten: string[]; 
 }
 
 interface AppState {
   userData: UserData | null;
   metrics: DashboardMetrics | null;
-  dietPlan: Meal[];
+  dietPlan: DietPlanData | null;
   dailyLogs: Record<string, DailyLog>; 
   waterIntake: number;
   
   updateUserData: (data: Partial<UserData>) => void;
   setMetrics: (metrics: DashboardMetrics) => void;
-  setDietPlan: (plan: Meal[]) => void;
+  setDietPlan: (plan: DietPlanData | null) => void;
   
   addWater: (amount: number) => void;
   resetWater: () => void;
+  updateSteps: (steps: number) => void;
   toggleMeal: (mealName: string, date: string) => void;
   logWeight: (weight: number, date: string) => void;
   
@@ -98,7 +116,7 @@ const getTodayString = () => new Date().toISOString().split('T')[0];
 export const AppProvider = ({ children }: { children: ReactNode }) => {
   const [userData, setUserData] = useState<UserData | null>(null);
   const [metrics, setMetrics] = useState<DashboardMetrics | null>(null);
-  const [dietPlan, setDietPlanState] = useState<Meal[]>([]);
+  const [dietPlan, setDietPlanState] = useState<DietPlanData | null>(null);
   const [dailyLogs, setDailyLogs] = useState<Record<string, DailyLog>>({});
   const [waterIntake, setWaterIntakeState] = useState<number>(0);
 
@@ -130,7 +148,7 @@ export const AppProvider = ({ children }: { children: ReactNode }) => {
   useEffect(() => {
     const today = getTodayString();
     setDailyLogs(prev => {
-      const todayLog = prev[today] || { date: today, water: 0, weight: userData?.weight || 0, mealsEaten: [] };
+      const todayLog = prev[today] || { date: today, water: 0, weight: userData?.weight || 0, currentSteps: 0, mealsEaten: [] };
       if (todayLog.water === waterIntake) return prev; 
       return {
         ...prev,
@@ -148,14 +166,25 @@ export const AppProvider = ({ children }: { children: ReactNode }) => {
 
 
 
-  const setDietPlan = (plan: Meal[]) => setDietPlanState(plan);
+  const setDietPlan = (plan: DietPlanData | null) => setDietPlanState(plan);
 
   const addWater = (amount: number) => setWaterIntakeState(prev => prev + amount);
   const resetWater = () => setWaterIntakeState(0);
 
+  const updateSteps = (steps: number) => {
+    const today = getTodayString();
+    setDailyLogs(prev => {
+      const log = prev[today] || { date: today, water: waterIntake, weight: userData?.weight || 0, currentSteps: 0, mealsEaten: [] };
+      return {
+        ...prev,
+        [today]: { ...log, currentSteps: steps }
+      };
+    });
+  };
+
   const toggleMeal = (mealName: string, date: string) => {
     setDailyLogs(prev => {
-      const log = prev[date] || { date, water: waterIntake, weight: userData?.weight || 0, mealsEaten: [] };
+      const log = prev[date] || { date, water: waterIntake, weight: userData?.weight || 0, currentSteps: 0, mealsEaten: [] };
       const hasEaten = log.mealsEaten.includes(mealName);
       return {
         ...prev,
@@ -171,7 +200,7 @@ export const AppProvider = ({ children }: { children: ReactNode }) => {
 
   const logWeight = (weight: number, date: string) => {
     setDailyLogs(prev => {
-      const log = prev[date] || { date, water: waterIntake, weight, mealsEaten: [] };
+      const log = prev[date] || { date, water: waterIntake, weight, currentSteps: 0, mealsEaten: [] };
       return { ...prev, [date]: { ...log, weight } };
     });
     if (date === getTodayString() && userData) {
@@ -182,7 +211,7 @@ export const AppProvider = ({ children }: { children: ReactNode }) => {
   const clearData = () => {
     setUserData(null);
     setMetrics(null);
-    setDietPlanState([]);
+    setDietPlanState(null);
     setDailyLogs({});
     setWaterIntakeState(0);
     localStorage.removeItem(LOCAL_STORAGE_KEY);
@@ -192,7 +221,7 @@ export const AppProvider = ({ children }: { children: ReactNode }) => {
     <AppContext.Provider value={{
       userData, metrics, dietPlan, dailyLogs, waterIntake,
       updateUserData, setMetrics, setDietPlan,
-      addWater, resetWater, toggleMeal, logWeight, clearData
+      addWater, resetWater, updateSteps, toggleMeal, logWeight, clearData
     }}>
       {children}
     </AppContext.Provider>

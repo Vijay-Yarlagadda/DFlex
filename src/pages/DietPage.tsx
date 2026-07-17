@@ -1,9 +1,8 @@
 import React from 'react';
 import { Navigate, useNavigate } from 'react-router-dom';
-import { useAppStore } from '../lib/store';
+import { useAppStore, type Meal } from '../lib/store';
 import { Card } from '../components/ui/Card';
-import { Button } from '../components/ui/Button';
-import { RefreshCw, Settings2, UtensilsCrossed, CheckCircle2, Circle } from 'lucide-react';
+import { RefreshCw, Settings2, UtensilsCrossed, CheckCircle2, Circle, ShoppingCart, Info, Lightbulb } from 'lucide-react';
 import { motion } from 'framer-motion';
 
 export const DietPage = () => {
@@ -14,12 +13,17 @@ export const DietPage = () => {
     return <Navigate to="/assessment" />;
   }
 
-  if (dietPlan.length === 0) {
+  if (!dietPlan) {
     return (
       <div className="p-4 md:p-8 max-w-5xl mx-auto space-y-6 pb-24 text-center mt-20">
         <h2 className="text-2xl font-black text-white mb-4">No Diet Plan Generated Yet</h2>
         <p className="text-zinc-400 mb-8">You need to generate your personalized AI protocol.</p>
-        <Button onClick={() => navigate('/generating')}>Generate My AI Diet</Button>
+        <button 
+          onClick={() => navigate('/generating')}
+          className="inline-flex items-center justify-center px-8 py-4 bg-[#CCFF00] hover:bg-[#b3ff00] text-black font-black uppercase tracking-widest rounded-lg shadow-[0_0_20px_rgba(204,255,0,0.3)] transition-all"
+        >
+          Generate My AI Diet
+        </button>
       </div>
     );
   }
@@ -28,7 +32,15 @@ export const DietPage = () => {
   const todayLog = dailyLogs[today] || { mealsEaten: [] };
   const eatenMeals = todayLog.mealsEaten || [];
   
-  const progressPercent = (eatenMeals.length / dietPlan.length) * 100;
+  const mealEntries: {name: string, meal: Meal}[] = [
+    { name: 'Breakfast', meal: dietPlan.breakfast },
+    { name: 'Morning Snack', meal: dietPlan.morningSnack as Meal },
+    { name: 'Lunch', meal: dietPlan.lunch },
+    { name: 'Evening Snack', meal: dietPlan.eveningSnack as Meal },
+    { name: 'Dinner', meal: dietPlan.dinner }
+  ].filter(entry => entry.meal && entry.meal.food); // Filter out empty meals
+
+  const progressPercent = mealEntries.length > 0 ? (eatenMeals.length / mealEntries.length) * 100 : 0;
 
   return (
     <div className="p-4 md:p-8 max-w-5xl mx-auto space-y-6 pb-24">
@@ -40,14 +52,14 @@ export const DietPage = () => {
           <p className="text-zinc-400">Your personalized AI-generated nutrition plan.</p>
         </div>
         <div className="flex gap-3">
-          <Button variant="outline" size="sm" onClick={() => navigate('/profile')}>
+          <button onClick={() => navigate('/profile')} className="px-4 py-2 border border-zinc-800 text-white rounded-lg hover:bg-zinc-900 transition-colors flex items-center text-sm font-bold">
             <Settings2 size={16} className="mr-2" />
             Config
-          </Button>
-          <Button size="sm" onClick={() => navigate('/generating')}>
+          </button>
+          <button onClick={() => navigate('/generating')} className="px-4 py-2 bg-white text-black rounded-lg hover:bg-zinc-200 transition-colors flex items-center text-sm font-bold">
             <RefreshCw size={16} className="mr-2" />
             Regenerate
-          </Button>
+          </button>
         </div>
       </header>
 
@@ -71,12 +83,13 @@ export const DietPage = () => {
       </Card>
 
       <div className="space-y-4">
-        {dietPlan.map((meal, index) => {
-          const isEaten = eatenMeals.includes(meal.name);
+        {mealEntries.map((entry, index) => {
+          const { name, meal } = entry;
+          const isEaten = eatenMeals.includes(name);
           
           return (
             <motion.div
-              key={meal.name}
+              key={name}
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ delay: index * 0.1 }}
@@ -87,7 +100,7 @@ export const DietPage = () => {
                     ? 'border-l-[#00E5FF] bg-[#00E5FF]/5' 
                     : 'border-l-[#CCFF00] hover:bg-zinc-900'
                 }`}
-                onClick={() => toggleMeal(meal.name, today)}
+                onClick={() => toggleMeal(name, today)}
               >
                 <div className="flex flex-col md:flex-row gap-6 items-start md:items-center justify-between">
                   
@@ -100,7 +113,7 @@ export const DietPage = () => {
                     <div>
                       <div className="flex items-center gap-2 text-zinc-500 font-bold uppercase tracking-wider text-xs mb-1">
                         <UtensilsCrossed size={14} />
-                        <span className={isEaten ? 'text-[#00E5FF]' : ''}>{meal.name}</span>
+                        <span className={isEaten ? 'text-[#00E5FF]' : ''}>{name}</span>
                       </div>
                       <h3 className={`text-xl font-bold mb-1 transition-colors ${isEaten ? 'text-zinc-300 line-through' : 'text-white'}`}>
                         {meal.food}
@@ -136,6 +149,56 @@ export const DietPage = () => {
           );
         })}
       </div>
+
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mt-8">
+        <Card className="p-6 bg-zinc-950 border-zinc-800">
+          <h3 className="text-sm font-bold text-[#CCFF00] uppercase tracking-widest mb-4 flex items-center gap-2">
+            <ShoppingCart size={16} /> Shopping Suggestions
+          </h3>
+          <ul className="space-y-2">
+            {dietPlan.shoppingSuggestions?.map((tip, i) => (
+              <li key={i} className="text-sm text-zinc-300 flex items-start gap-2">
+                <span className="text-zinc-600 mt-1">•</span> {tip}
+              </li>
+            ))}
+            {(!dietPlan.shoppingSuggestions || dietPlan.shoppingSuggestions.length === 0) && (
+              <li className="text-sm text-zinc-500">No suggestions available.</li>
+            )}
+          </ul>
+        </Card>
+        
+        <Card className="p-6 bg-zinc-950 border-zinc-800">
+          <h3 className="text-sm font-bold text-[#00E5FF] uppercase tracking-widest mb-4 flex items-center gap-2">
+            <Lightbulb size={16} /> Healthy Alternatives
+          </h3>
+          <ul className="space-y-2">
+            {dietPlan.healthyAlternatives?.map((alt, i) => (
+              <li key={i} className="text-sm text-zinc-300 flex items-start gap-2">
+                <span className="text-zinc-600 mt-1">•</span> {alt}
+              </li>
+            ))}
+            {(!dietPlan.healthyAlternatives || dietPlan.healthyAlternatives.length === 0) && (
+              <li className="text-sm text-zinc-500">No alternatives available.</li>
+            )}
+          </ul>
+        </Card>
+      </div>
+
+      <Card className="p-6 bg-zinc-950 border-zinc-800">
+        <h3 className="text-sm font-bold text-[#FF3366] uppercase tracking-widest mb-4 flex items-center gap-2">
+          <Info size={16} /> Nutrition Tips
+        </h3>
+        <ul className="space-y-2">
+          {dietPlan.nutritionTips?.map((tip, i) => (
+            <li key={i} className="text-sm text-zinc-300 flex items-start gap-2">
+              <span className="text-zinc-600 mt-1">•</span> {tip}
+            </li>
+          ))}
+          {(!dietPlan.nutritionTips || dietPlan.nutritionTips.length === 0) && (
+            <li className="text-sm text-zinc-500">No tips available.</li>
+          )}
+        </ul>
+      </Card>
     </div>
   );
 };

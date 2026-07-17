@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useAppStore } from '../lib/store';
 import { useAuth } from '@clerk/clerk-react';
+import toast from 'react-hot-toast';
 
 const loadingSteps = [
   "Calculating BMI...",
@@ -59,12 +60,15 @@ export const AILoadingScreen = () => {
         if (isMounted) {
           setMetrics(json.metrics);
           setDietPlan(json.diet);
+          toast.success("Diet generated successfully!");
           navigate('/diet'); 
         }
       } catch (err: any) {
         console.error(err);
         if (isMounted) {
           setError(err.message || 'Failed to generate diet');
+          toast.error(err.message || 'Failed to generate diet');
+          clearInterval(interval);
         }
       }
     };

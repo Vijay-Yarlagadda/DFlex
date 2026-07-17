@@ -27,6 +27,8 @@ export interface IUser extends Document {
   alcohol: string;
   cookingTime: string;
   spicePreference: string;
+  averageDailySteps: string;
+  stressLevel: string;
   createdAt: Date;
   updatedAt: Date;
 }
@@ -57,7 +59,9 @@ const UserSchema: Schema = new Schema({
   smoking: { type: String },
   alcohol: { type: String },
   cookingTime: { type: String },
-  spicePreference: { type: String }
+  spicePreference: { type: String },
+  averageDailySteps: { type: String },
+  stressLevel: { type: String }
 }, { timestamps: true });
 
 export default mongoose.model<IUser>('User', UserSchema);

@@ -39,7 +39,9 @@ const ProfileSchema = z.object({
   smoking: z.string(),
   alcohol: z.string(),
   cookingTime: z.string(),
-  spicePreference: z.string()
+  spicePreference: z.string(),
+  averageDailySteps: z.string().optional().default("0-3000"),
+  stressLevel: z.string().optional().default("Medium")
 });
 
 export const calculatePreview = async (req: Request, res: Response): Promise<void> => {
@@ -106,6 +108,7 @@ export const generateDiet = async (req: Request, res: Response): Promise<void> =
 
     const diff_ms = Date.now() - new Date(parsedData.dob || '1995-01-01').getTime();
     const age = Math.abs(new Date(diff_ms).getUTCFullYear() - 1970);
+    console.log("✅ Parsed data and calculated age:", age);
 
     // 2-6. Calculate all metrics
     const bmiData = calculateBMI(weightKg, heightCm);
@@ -114,6 +117,7 @@ export const generateDiet = async (req: Request, res: Response): Promise<void> =
     const targetCalories = calculateTargetCalories(tdee, parsedData.goal as GoalType);
     const macros = calculateMacros(targetCalories, parsedData.goal as GoalType, weightKg);
     const water = calculateWaterIntake(weightKg, parsedData.activityLevel, parsedData.workoutDays);
+    console.log("✅ Calculated metrics");
 
     // 7-8. Build AI Prompt and Call Gemini
     const foodLikes = Object.entries(parsedData.foodPreferences)
@@ -124,6 +128,7 @@ export const generateDiet = async (req: Request, res: Response): Promise<void> =
       .filter(([_, v]) => v === 'Avoid')
       .map(([k]) => k).join(', ') || 'None';
 
+    console.log("⏳ Calling Gemini API...");
     const aiDiet = await generateDietFromAI({
       age,
       gender: parsedData.gender,
@@ -147,9 +152,12 @@ export const generateDiet = async (req: Request, res: Response): Promise<void> =
       allergies: parsedData.allergies.join(', '),
       mealsPerDay: parsedData.mealsPerDay,
       cookingTime: parsedData.cookingTime,
-      waterGoal: `${water.litres}L`,
-      medicalConditions: parsedData.medicalConditions.join(', ')
+      waterGoal: water.ml + "ml",
+      medicalConditions: parsedData.medicalConditions?.join(', ') || "None",
+      averageDailySteps: parsedData.averageDailySteps || "0-3000",
+      stressLevel: parsedData.stressLevel || "Medium"
     });
+    console.log("✅ Received Gemini response");
 
     // 9. Save in MongoDB
     let user = await User.findOne({ clerkId });
@@ -178,8 +186,9 @@ export const generateDiet = async (req: Request, res: Response): Promise<void> =
       totalProtein: aiDiet.TotalProtein,
       totalCarbs: aiDiet.TotalCarbs,
       totalFat: aiDiet.TotalFat,
-      shoppingTips: aiDiet.ShoppingTips || [],
-      mealAlternatives: aiDiet.MealAlternatives || []
+      shoppingSuggestions: aiDiet.ShoppingSuggestions || [],
+      healthyAlternatives: aiDiet.HealthyAlternatives || [],
+      nutritionTips: aiDiet.NutritionTips || []
     });
     
     await dietPlan.save();
@@ -225,6 +234,38 @@ export const getDiet = async (req: Request, res: Response): Promise<void> => {
     }
 
     res.json(diet);
+  } catch (error) {
+    res.status(500).json({ error: "Server error" });
+  }
+};
+
+export const getProfile = async (req: Request, res: Response): Promise<void> => {
+  try {
+    const clerkId = getAuth(req).userId;
+    const user = await User.findOne({ clerkId });
+    if (!user) {
+      res.status(404).json({ error: "User not found" });
+      return;
+    }
+
+    const diet = await DietPlan.findOne({ userId: user._id }).sort({ createdAt: -1 });
+    
+    // Convert diet to metrics payload format if it exists
+    let metrics = null;
+    if (diet) {
+      metrics = {
+        bmi: diet.bmi,
+        bmr: diet.bmr,
+        tdee: diet.tdee,
+        dailyCalories: diet.targetCalories,
+        protein: diet.targetProtein,
+        carbs: diet.targetCarbs,
+        fat: diet.targetFat,
+        waterGoal: 3000 // default fallback, or parse user.waterIntakeGoal if preferred
+      };
+    }
+
+    res.json({ user, diet, metrics });
   } catch (error) {
     res.status(500).json({ error: "Server error" });
   }

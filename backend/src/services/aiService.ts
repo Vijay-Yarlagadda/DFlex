@@ -8,7 +8,7 @@ const getAIModel = () => {
     if (!apiKey) throw new Error("GEMINI_API_KEY is missing in environment variables");
     genAI = new GoogleGenerativeAI(apiKey);
   }
-  return genAI.getGenerativeModel({ model: 'gemini-2.5-flash' });
+  return genAI.getGenerativeModel({ model: 'gemini-1.5-flash' });
 };
 
 interface DietPromptData {
@@ -36,6 +36,8 @@ interface DietPromptData {
   cookingTime: string;
   waterGoal: string;
   medicalConditions: string;
+  averageDailySteps: string;
+  stressLevel: string;
 }
 
 export const buildPrompt = (data: DietPromptData): string => {
@@ -54,6 +56,8 @@ Create a hyper-personalized, realistic daily diet plan based on the following us
 - Activity Level: ${data.activityLevel}
 - Workout Days: ${data.workoutDays}/week
 - Medical Conditions: ${data.medicalConditions}
+- Average Daily Steps: ${data.averageDailySteps}
+- Stress Level: ${data.stressLevel}
 
 ## TARGET GOALS
 - Primary Goal: ${data.goal}
@@ -83,11 +87,12 @@ Return the diet plan as a VALID JSON object matching exactly this schema, withou
   "TotalProtein": number,
   "TotalCarbs": number,
   "TotalFat": number,
-  "ShoppingTips": ["string"],
-  "MealAlternatives": ["string"]
+  "ShoppingSuggestions": ["string"],
+  "HealthyAlternatives": ["string"],
+  "NutritionTips": ["string"]
 }
 
-Ensure the Total macros roughly match the Target macros. If the user requested less than 5 meals, you can omit snacks or set them to empty objects.
+Ensure the Total macros roughly match the Target macros. If the user requested less than 5 meals, you can omit snacks by passing null or an empty object.
 `;
 };
 
@@ -104,7 +109,9 @@ export const generateDietFromAI = async (promptData: DietPromptData) => {
       }
     });
     
-    const responseText = result.response.text();
+    let responseText = result.response.text();
+    // Sometimes the model might include markdown wrappers despite responseMimeType
+    responseText = responseText.replace(/```json\n?/g, '').replace(/```\n?/g, '').trim();
     return JSON.parse(responseText);
   } catch (error) {
     console.error("Gemini API Error:", error);

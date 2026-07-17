@@ -27,8 +27,9 @@ export interface IDietPlan extends Document {
   totalProtein: number;
   totalCarbs: number;
   totalFat: number;
-  shoppingTips: string[];
-  mealAlternatives: string[];
+  shoppingSuggestions: string[];
+  healthyAlternatives: string[];
+  nutritionTips: string[];
   createdAt: Date;
 }
 
@@ -65,8 +66,9 @@ const DietPlanSchema: Schema = new Schema({
   totalCarbs: { type: Number },
   totalFat: { type: Number },
   
-  shoppingTips: [{ type: String }],
-  mealAlternatives: [{ type: String }]
+  shoppingSuggestions: [{ type: String }],
+  healthyAlternatives: [{ type: String }],
+  nutritionTips: [{ type: String }]
 }, { timestamps: true });
 
 export default mongoose.model<IDietPlan>('DietPlan', DietPlanSchema);

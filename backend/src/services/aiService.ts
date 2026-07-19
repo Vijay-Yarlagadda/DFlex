@@ -78,18 +78,18 @@ Create a hyper-personalized, realistic daily diet plan based on the following us
 ## OUTPUT REQUIREMENT (STRICT JSON ONLY)
 Return the diet plan as a VALID JSON object matching exactly this schema, without any markdown formatting or \`\`\`json wrappers. Do not include plain text.
 {
-  "Breakfast": { "food": "string", "qty": "string", "calories": number, "protein": number, "carbs": number, "fat": number },
-  "Morning Snack": { "food": "string", "qty": "string", "calories": number, "protein": number, "carbs": number, "fat": number },
-  "Lunch": { "food": "string", "qty": "string", "calories": number, "protein": number, "carbs": number, "fat": number },
-  "Evening Snack": { "food": "string", "qty": "string", "calories": number, "protein": number, "carbs": number, "fat": number },
-  "Dinner": { "food": "string", "qty": "string", "calories": number, "protein": number, "carbs": number, "fat": number },
-  "TotalCalories": number,
-  "TotalProtein": number,
-  "TotalCarbs": number,
-  "TotalFat": number,
-  "ShoppingSuggestions": ["string"],
-  "HealthyAlternatives": ["string"],
-  "NutritionTips": ["string"]
+  "breakfast": { "food": "string", "qty": "string", "calories": number, "protein": number, "carbs": number, "fat": number },
+  "morningSnack": { "food": "string", "qty": "string", "calories": number, "protein": number, "carbs": number, "fat": number },
+  "lunch": { "food": "string", "qty": "string", "calories": number, "protein": number, "carbs": number, "fat": number },
+  "eveningSnack": { "food": "string", "qty": "string", "calories": number, "protein": number, "carbs": number, "fat": number },
+  "dinner": { "food": "string", "qty": "string", "calories": number, "protein": number, "carbs": number, "fat": number },
+  "totalCalories": number,
+  "totalProtein": number,
+  "totalCarbs": number,
+  "totalFat": number,
+  "shoppingSuggestions": ["string"],
+  "healthyAlternatives": ["string"],
+  "nutritionTips": ["string"]
 }
 
 Ensure the Total macros roughly match the Target macros. If the user requested less than 5 meals, you can omit snacks by passing null or an empty object.

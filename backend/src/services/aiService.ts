@@ -8,7 +8,7 @@ const getAIModel = () => {
     if (!apiKey) throw new Error("GEMINI_API_KEY is missing in environment variables");
     genAI = new GoogleGenerativeAI(apiKey);
   }
-  return genAI.getGenerativeModel({ model: 'gemini-1.5-flash' });
+  return genAI.getGenerativeModel({ model: 'gemini-1.5-pro' });
 };
 
 interface DietPromptData {

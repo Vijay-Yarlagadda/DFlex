@@ -56,33 +56,16 @@ export const getUserById = async (userId: string) => {
 };
 
 export const googleLoginUser = async (credential: string) => {
-  let email, name;
-
-  // Check if it's a JWT (ID Token) which has dots, otherwise treat as access_token
-  if (credential.includes('.')) {
-    const ticket = await googleClient.verifyIdToken({
-      idToken: credential,
-      audience: process.env.GOOGLE_CLIENT_ID,
-    });
-    const payload = ticket.getPayload();
-    if (!payload || !payload.email) {
-      throw new Error('Invalid Google token');
-    }
-    email = payload.email;
-    name = payload.name;
-  } else {
-    // Treat as access token
-    const response = await fetch('https://www.googleapis.com/oauth2/v3/userinfo', {
-      headers: { Authorization: `Bearer ${credential}` }
-    });
-    if (!response.ok) {
-      throw new Error('Invalid Google access token');
-    }
-    const data = await response.json();
-    email = data.email;
-    name = data.name;
+  const ticket = await googleClient.verifyIdToken({
+    idToken: credential,
+    audience: process.env.GOOGLE_CLIENT_ID,
+  });
+  const payload = ticket.getPayload();
+  if (!payload || !payload.email) {
+    throw new Error('Invalid Google token');
   }
 
+  const { email, name } = payload;
   let user = await User.findOne({ email });
 
   if (!user) {

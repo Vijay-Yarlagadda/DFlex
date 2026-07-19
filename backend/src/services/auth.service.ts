@@ -1,6 +1,9 @@
 import { User } from '../models/User';
 import bcrypt from 'bcrypt';
 import jwt from 'jsonwebtoken';
+import { OAuth2Client } from 'google-auth-library';
+
+const googleClient = new OAuth2Client(process.env.GOOGLE_CLIENT_ID);
 
 export const registerUser = async (userData: any) => {
   const { name, email, password } = userData;
@@ -50,4 +53,34 @@ export const getUserById = async (userId: string) => {
     throw new Error('User not found');
   }
   return user;
+};
+
+export const googleLoginUser = async (credential: string) => {
+  const ticket = await googleClient.verifyIdToken({
+    idToken: credential,
+    audience: process.env.GOOGLE_CLIENT_ID,
+  });
+  const payload = ticket.getPayload();
+  if (!payload || !payload.email) {
+    throw new Error('Invalid Google token');
+  }
+
+  const { email, name } = payload;
+  let user = await User.findOne({ email });
+
+  if (!user) {
+    user = await User.create({
+      name: name || 'Google User',
+      email,
+      authProvider: 'google',
+    });
+  }
+
+  const jwtToken = jwt.sign(
+    { userId: user._id },
+    process.env.JWT_SECRET || 'secret',
+    { expiresIn: '7d' }
+  );
+
+  return { token: jwtToken, user: { id: user._id, name: user.name, email: user.email } };
 };

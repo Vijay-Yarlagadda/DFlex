@@ -26,6 +26,15 @@ export const login = async (req: Request, res: Response) => {
   }
 };
 
+export const googleLogin = async (req: Request, res: Response) => {
+  try {
+    const data = await authService.googleLoginUser(req.body.credential);
+    return sendResponse(res, 200, true, 'Google Login successful', data);
+  } catch (error: any) {
+    return sendResponse(res, 401, false, 'Google authentication failed', error.message);
+  }
+};
+
 export const me = async (req: Request, res: Response) => {
   try {
     const user = await authService.getUserById(req.user!.id);

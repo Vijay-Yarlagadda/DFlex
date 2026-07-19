@@ -4,6 +4,7 @@ import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
 import { useNavigate, Link } from 'react-router-dom';
 import { useAuthContext } from '../context/AuthContext';
+import { GoogleLogin } from '@react-oauth/google';
 import api from '../lib/api';
 import toast from 'react-hot-toast';
 import { Dumbbell } from 'lucide-react';
@@ -20,7 +21,7 @@ export const Login = () => {
   const { register, handleSubmit, formState: { errors } } = useForm<LoginForm>({
     resolver: zodResolver(loginSchema),
   });
-  const { login } = useAuthContext();
+  const { login, loginWithGoogle } = useAuthContext();
   const navigate = useNavigate();
   const [isLoading, setIsLoading] = useState(false);
 
@@ -82,9 +83,43 @@ export const Login = () => {
           </button>
         </form>
 
-        <p className="text-center text-zinc-400 text-sm mt-6">
+        <div className="mt-6">
+          <div className="relative">
+            <div className="absolute inset-0 flex items-center">
+              <div className="w-full border-t border-zinc-800"></div>
+            </div>
+            <div className="relative flex justify-center text-sm">
+              <span className="px-2 bg-zinc-950 text-zinc-500">Or continue with</span>
+            </div>
+          </div>
+
+          <div className="mt-6 flex justify-center">
+            <GoogleLogin
+              onSuccess={async (credentialResponse) => {
+                try {
+                  if (credentialResponse.credential) {
+                    await loginWithGoogle(credentialResponse.credential);
+                    toast.success("Logged in with Google successfully!");
+                    navigate('/dashboard');
+                  }
+                } catch (err: any) {
+                  toast.error(err.response?.data?.message || 'Google login failed');
+                }
+              }}
+              onError={() => {
+                toast.error('Google login failed');
+              }}
+              theme="filled_black"
+              shape="rectangular"
+              text="continue_with"
+              size="large"
+            />
+          </div>
+        </div>
+
+        <p className="mt-8 text-center text-sm text-zinc-400">
           Don't have an account?{' '}
-          <Link to="/sign-up" className="text-[#CCFF00] hover:underline">
+          <Link to="/sign-up" className="font-bold text-[#CCFF00] hover:text-[#B3E600]">
             Sign up
           </Link>
         </p>

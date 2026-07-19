@@ -6,8 +6,8 @@ import {
   HeartPulse, Sparkles, Dumbbell, Home
 } from 'lucide-react';
 import { useAppStore, type UserData, type PreferenceLevel } from '../lib/store';
-import { useAuth } from '@clerk/clerk-react';
 import { Button } from '../components/ui/button';
+import api from '../lib/api';
 
 // --- DATA CONSTANTS ---
 const TRAINING_TYPES = ['Gym', 'Home Workout', 'CrossFit', 'Running', 'Cycling', 'Yoga', 'Sports', 'No Exercise'];
@@ -423,7 +423,6 @@ const Step3 = ({ data, update, toggle }: any) => (
 );
 
 const Step4 = ({ data }: { data: UserData }) => {
-  const { getToken } = useAuth();
   const [metrics, setMetrics] = useState<any>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
@@ -431,19 +430,9 @@ const Step4 = ({ data }: { data: UserData }) => {
   useEffect(() => {
     const fetchMetrics = async () => {
       try {
-        const token = await getToken();
-        const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:5000';
-        const res = await fetch(`${API_URL}/api/calculate`, {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-            'Authorization': `Bearer ${token}`
-          },
-          body: JSON.stringify(data)
-        });
-        if (!res.ok) throw new Error('Failed to calculate metrics');
-        const json = await res.json();
-        setMetrics(json);
+        const res = await api.post('/calculate', data);
+        if (!res.data) throw new Error('Failed to calculate metrics');
+        setMetrics(res.data);
       } catch (err: any) {
         setError(err.message || 'Failed to calculate');
       } finally {
@@ -451,7 +440,7 @@ const Step4 = ({ data }: { data: UserData }) => {
       }
     };
     fetchMetrics();
-  }, [data, getToken]);
+  }, [data]);
 
   const lovedCount = Object.values(data.foodPreferences).filter(v => v === 'Love').length;
   const avoidedCount = Object.values(data.foodPreferences).filter(v => v === 'Avoid').length;

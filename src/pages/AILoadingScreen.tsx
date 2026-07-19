@@ -3,7 +3,7 @@ import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useAppStore } from '../lib/store';
-import { useAuth } from '@clerk/clerk-react';
+import api from '../lib/api';
 import toast from 'react-hot-toast';
 
 const loadingSteps = [
@@ -19,7 +19,6 @@ const loadingSteps = [
 ];
 
 export const AILoadingScreen = () => {
-  const { getToken } = useAuth();
   const navigate = useNavigate();
   const { userData, setMetrics, setDietPlan } = useAppStore();
   const [stepIndex, setStepIndex] = useState(0);
@@ -42,28 +41,19 @@ export const AILoadingScreen = () => {
 
     const fetchDiet = async () => {
       try {
-        const token = await getToken();
-        const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:5000';
-        const res = await fetch(`${API_URL}/api/generate-diet`, {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-            'Authorization': `Bearer ${token}`
-          },
-          body: JSON.stringify(userData)
-        });
+        const res = await api.post('/generate-diet', userData);
         
-        if (!res.ok) {
-          throw new Error('Failed to generate diet');
-        }
+        if (res.data && res.data.metrics) {
+          const json = res.data;
         
-        const json = await res.json();
-        
-        if (isMounted) {
-          setMetrics(json.metrics);
-          setDietPlan(json.diet);
-          toast.success("Diet generated successfully!");
-          navigate('/diet'); 
+          if (isMounted) {
+            setMetrics(json.metrics);
+            setDietPlan(json.diet);
+            toast.success("Diet generated successfully!");
+            navigate('/diet'); 
+          }
+        } else {
+          throw new Error('Invalid response format');
         }
       } catch (err: any) {
         console.error(err);

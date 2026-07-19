@@ -1,13 +1,15 @@
-import { Router } from 'express';
-import { generateDiet, getDiet, updateProfile, calculatePreview, getProfile } from '../controllers/dietController';
-import { requireUserAuth } from '../middlewares/auth';
+import express from 'express';
+import * as dietController from '../controllers/diet.controller';
+import { validate } from '../middlewares/validate.middleware';
+import { ProfileSchema } from '../validators/diet.validator';
+import { authMiddleware } from '../middlewares/auth.middleware';
 
-const router = Router();
+const router = express.Router();
 
-router.post('/calculate', requireUserAuth, calculatePreview);
-router.post('/generate-diet', requireUserAuth, generateDiet);
-router.get('/diet/:id', requireUserAuth, getDiet);
-router.get('/profile', requireUserAuth, getProfile);
-router.put('/profile', requireUserAuth, updateProfile);
+router.post('/calculate', authMiddleware, validate(ProfileSchema), dietController.calculatePreview);
+router.post('/generate-diet', authMiddleware, validate(ProfileSchema), dietController.generateDiet);
+router.get('/diet', authMiddleware, dietController.getDiet);
+router.get('/profile', authMiddleware, dietController.getProfile);
+router.put('/profile', authMiddleware, dietController.updateProfile);
 
 export default router;

@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { useUser, useAuth } from '@clerk/clerk-react';
+import { useAuthContext } from '../context/AuthContext';
+import api from '../lib/api';
 import { useAppStore } from '../lib/store';
 import { Button } from '../components/ui/button';
 import { ArrowRight, ChevronDown } from 'lucide-react';
@@ -15,7 +16,7 @@ const InputGroup = ({ label, children }: { label: string, children: React.ReactN
 
 export const Onboarding = () => {
   const navigate = useNavigate();
-  const { user } = useUser();
+  const { user } = useAuthContext();
   const { updateUserData } = useAppStore();
 
   const [formData, setFormData] = useState({
@@ -31,8 +32,8 @@ export const Onboarding = () => {
   });
 
   useEffect(() => {
-    if (user && user.firstName && !formData.name) {
-      setFormData(prev => ({ ...prev, name: user.fullName || user.firstName || '' }));
+    if (user && user.name && !formData.name) {
+      setFormData(prev => ({ ...prev, name: user.name }));
     }
   }, [user]);
 
@@ -40,7 +41,7 @@ export const Onboarding = () => {
     setFormData(prev => ({ ...prev, [field]: value }));
   };
 
-  const { getToken } = useAuth();
+
   
   const handleFinish = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -63,16 +64,7 @@ export const Onboarding = () => {
     updateUserData(userDataToUpdate);
     
     try {
-      const token = await getToken();
-      const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:5000';
-      await fetch(`${API_URL}/api/profile`, {
-        method: 'PUT',
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${token}`
-        },
-        body: JSON.stringify(userDataToUpdate)
-      });
+      await api.put('/profile', userDataToUpdate);
     } catch (err) {
       console.error("Failed to save profile to backend", err);
     }

@@ -1,9 +1,11 @@
 import { NavLink } from 'react-router-dom';
 import { Home, Utensils, Droplet, User, Activity } from 'lucide-react';
 import { Outlet } from 'react-router-dom';
-import { UserButton } from '@clerk/clerk-react';
+import { useAuthContext } from '../context/AuthContext';
+import { LogOut } from 'lucide-react';
 
 export const Layout = () => {
+  const { user, logout } = useAuthContext();
   return (
     <div className="min-h-screen bg-black text-zinc-50 pb-20 md:pb-0 md:flex flex-col md:flex-row">
       {/* Mobile Top Header */}
@@ -14,7 +16,9 @@ export const Layout = () => {
           </div>
           <span className="text-lg font-black tracking-tighter uppercase text-white">DFlex</span>
         </div>
-        <UserButton afterSignOutUrl="/" />
+        <button onClick={logout} className="p-2 bg-zinc-900 rounded-full text-zinc-400 hover:text-white transition-colors">
+          <LogOut size={20} />
+        </button>
       </header>
 
       {/* Desktop Sidebar (hidden on mobile) */}
@@ -35,18 +39,16 @@ export const Layout = () => {
         </nav>
 
         <div className="p-4 mt-auto border-t border-zinc-900">
-          <UserButton 
-            afterSignOutUrl="/" 
-            showName={true}
-            appearance={{
-              elements: {
-                rootBox: "w-full",
-                userButtonTrigger: "w-full flex items-center justify-start gap-3 p-3 rounded-xl hover:bg-zinc-900/80 border border-transparent hover:border-zinc-800 transition-colors",
-                userButtonOuterIdentifier: "text-zinc-300 font-bold text-sm",
-                userButtonAvatarBox: "w-8 h-8"
-              }
-            }}
-          />
+          <button 
+            onClick={logout}
+            className="w-full flex items-center justify-start gap-3 p-3 rounded-xl hover:bg-zinc-900/80 border border-transparent hover:border-zinc-800 transition-colors text-zinc-300 font-bold text-sm"
+          >
+            <div className="w-8 h-8 bg-zinc-800 rounded-full flex items-center justify-center text-white">
+              {user?.name?.charAt(0) || <User size={16} />}
+            </div>
+            <span>{user?.name || 'User'}</span>
+            <LogOut size={16} className="ml-auto text-zinc-500" />
+          </button>
         </div>
       </aside>
 

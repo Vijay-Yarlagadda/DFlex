@@ -8,7 +8,7 @@ const getAIModel = () => {
     if (!apiKey) throw new Error("GEMINI_API_KEY is missing in environment variables");
     genAI = new GoogleGenerativeAI(apiKey);
   }
-  return genAI.getGenerativeModel({ model: 'gemini-pro' });
+  return genAI.getGenerativeModel({ model: 'gemini-1.5-flash' });
 };
 
 interface DietPromptData {
@@ -104,7 +104,8 @@ export const generateDietFromAI = async (promptData: DietPromptData) => {
     const result = await model.generateContent({
       contents: [{ role: 'user', parts: [{ text: prompt }] }],
       generationConfig: {
-        temperature: 0.2
+        temperature: 0.2,
+        responseMimeType: "application/json",
       }
     });
     

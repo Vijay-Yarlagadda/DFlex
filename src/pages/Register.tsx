@@ -10,6 +10,8 @@ import toast from 'react-hot-toast';
 import { Dumbbell } from 'lucide-react';
 import { WaveBackground } from '../components/layout/WaveBackground';
 
+import { useAppStore } from '../lib/store';
+
 const registerSchema = z.object({
   name: z.string().min(2, 'Name must be at least 2 characters'),
   email: z.string().email('Please enter a valid email'),
@@ -24,6 +26,7 @@ export const Register = () => {
   });
   const navigate = useNavigate();
   const { loginWithGoogle } = useAuthContext();
+  const { syncProfileWithBackend } = useAppStore();
   const [isLoading, setIsLoading] = useState(false);
 
   const onSubmit = async (data: RegisterForm) => {
@@ -111,7 +114,8 @@ export const Register = () => {
                   if (credentialResponse.credential) {
                     await loginWithGoogle(credentialResponse.credential);
                     toast.success("Registered with Google successfully!");
-                    navigate('/dashboard');
+                    const { hasDiet } = await syncProfileWithBackend();
+                    navigate(hasDiet ? '/dashboard' : '/assessment');
                   }
                 } catch (err: any) {
                   toast.error(err.response?.data?.message || 'Google registration failed');

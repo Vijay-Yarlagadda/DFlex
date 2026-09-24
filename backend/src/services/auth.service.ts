@@ -3,7 +3,8 @@ import bcrypt from 'bcrypt';
 import jwt from 'jsonwebtoken';
 import { OAuth2Client } from 'google-auth-library';
 
-const googleClient = new OAuth2Client(process.env.GOOGLE_CLIENT_ID);
+const GOOGLE_CLIENT_ID = process.env.GOOGLE_CLIENT_ID || '26230538185-afmu3423q1u7mbj1k80pkp3d495lvm4b.apps.googleusercontent.com';
+const googleClient = new OAuth2Client(GOOGLE_CLIENT_ID);
 
 export const registerUser = async (userData: any) => {
   const { name, email, password } = userData;
@@ -58,7 +59,7 @@ export const getUserById = async (userId: string) => {
 export const googleLoginUser = async (credential: string) => {
   const ticket = await googleClient.verifyIdToken({
     idToken: credential,
-    audience: process.env.GOOGLE_CLIENT_ID,
+    audience: GOOGLE_CLIENT_ID,
   });
   const payload = ticket.getPayload();
   if (!payload || !payload.email) {

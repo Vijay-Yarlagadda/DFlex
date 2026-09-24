@@ -29,7 +29,7 @@ const ProtectedRoute = () => {
 };
 
 function App() {
-  const clientId = import.meta.env.VITE_GOOGLE_CLIENT_ID || 'YOUR_GOOGLE_CLIENT_ID';
+  const clientId = import.meta.env.VITE_GOOGLE_CLIENT_ID || '26230538185-afmu3423q1u7mbj1k80pkp3d495lvm4b.apps.googleusercontent.com';
 
   return (
     <GoogleOAuthProvider clientId={clientId}>

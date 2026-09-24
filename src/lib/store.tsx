@@ -1,4 +1,5 @@
 import { createContext, useContext, useState, useEffect, type ReactNode } from 'react';
+import api from './api';
 
 export type GoalType = 'Lean Bulk' | 'Dirty Bulk' | 'Lean Cut' | 'Fat Loss' | 'Maintenance' | 'Body Recomposition';
 export type PreferenceLevel = 'Love' | 'Like' | 'Neutral' | 'Avoid';
@@ -99,6 +100,7 @@ interface AppState {
   updateSteps: (steps: number) => void;
   toggleMeal: (mealName: string, date: string) => void;
   logWeight: (weight: number, date: string) => void;
+  syncProfileWithBackend: () => Promise<{ hasProfile: boolean; hasDiet: boolean }>;
   
   clearData: () => void;
 }
@@ -208,6 +210,52 @@ export const AppProvider = ({ children }: { children: ReactNode }) => {
     }
   };
 
+  const syncProfileWithBackend = async () => {
+    try {
+      const response = await api.get('/profile');
+      if (response.data) {
+        const { user: backendUser, diet, metrics: backendMetrics } = response.data;
+        if (backendMetrics) setMetrics(backendMetrics);
+        if (diet) setDietPlanState(diet);
+        if (backendUser) {
+          setUserData(prev => prev || {
+            name: backendUser.name || 'Athlete',
+            dob: '1998-01-01',
+            gender: 'Male',
+            height: 175,
+            heightUnit: 'cm',
+            weight: 70,
+            weightUnit: 'kg',
+            trainingType: 'Gym',
+            activityLevel: 'Moderately Active',
+            workoutDays: 4,
+            mealsPerDay: 4,
+            budget: 'Medium',
+            goal: 'Maintenance',
+            dietType: 'Non-Veg',
+            cuisinePreference: 'Any',
+            foodPreferences: {},
+            supplements: [],
+            allergies: [],
+            medicalConditions: [],
+            waterIntakeGoal: '3L',
+            sleepDuration: '7-8 hrs',
+            smoking: 'No',
+            alcohol: 'No',
+            cookingTime: '30 mins',
+            spicePreference: 'Medium',
+            averageDailySteps: '6000-10000',
+            stressLevel: 'Medium'
+          });
+        }
+        return { hasProfile: !!backendUser, hasDiet: !!diet };
+      }
+    } catch (e) {
+      console.error('Failed to sync profile with backend', e);
+    }
+    return { hasProfile: false, hasDiet: false };
+  };
+
   const clearData = () => {
     setUserData(null);
     setMetrics(null);
@@ -221,7 +269,7 @@ export const AppProvider = ({ children }: { children: ReactNode }) => {
     <AppContext.Provider value={{
       userData, metrics, dietPlan, dailyLogs, waterIntake,
       updateUserData, setMetrics, setDietPlan,
-      addWater, resetWater, updateSteps, toggleMeal, logWeight, clearData
+      addWater, resetWater, updateSteps, toggleMeal, logWeight, syncProfileWithBackend, clearData
     }}>
       {children}
     </AppContext.Provider>

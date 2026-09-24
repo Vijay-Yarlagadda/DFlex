@@ -10,6 +10,8 @@ import toast from 'react-hot-toast';
 import { Dumbbell } from 'lucide-react';
 import { WaveBackground } from '../components/layout/WaveBackground';
 
+import { useAppStore } from '../lib/store';
+
 const loginSchema = z.object({
   email: z.string().email('Please enter a valid email'),
   password: z.string().min(6, 'Password must be at least 6 characters'),
@@ -22,6 +24,7 @@ export const Login = () => {
     resolver: zodResolver(loginSchema),
   });
   const { login, loginWithGoogle } = useAuthContext();
+  const { syncProfileWithBackend } = useAppStore();
   const navigate = useNavigate();
   const [isLoading, setIsLoading] = useState(false);
 
@@ -32,7 +35,8 @@ export const Login = () => {
       if (response.data.success) {
         toast.success('Logged in successfully!');
         login(response.data.data.token, response.data.data.user);
-        navigate('/dashboard');
+        const { hasDiet } = await syncProfileWithBackend();
+        navigate(hasDiet ? '/dashboard' : '/assessment');
       }
     } catch (error: any) {
       toast.error(error.response?.data?.message || 'Login failed');
@@ -100,7 +104,8 @@ export const Login = () => {
                   if (credentialResponse.credential) {
                     await loginWithGoogle(credentialResponse.credential);
                     toast.success("Logged in with Google successfully!");
-                    navigate('/dashboard');
+                    const { hasDiet } = await syncProfileWithBackend();
+                    navigate(hasDiet ? '/dashboard' : '/assessment');
                   }
                 } catch (err: any) {
                   toast.error(err.response?.data?.message || 'Google login failed');
